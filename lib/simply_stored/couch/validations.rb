@@ -80,5 +80,3 @@ module SimplyStored
     end
   end
 end
-
-  

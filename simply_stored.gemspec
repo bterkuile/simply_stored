@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
      "lib/simply_stored/couch/has_one.rb",
      "lib/simply_stored/couch/properties.rb",
      "lib/simply_stored/couch/validations.rb",
+     "lib/simply_stored/couch/pagination.rb",
      "lib/simply_stored/couch/views.rb",
      "lib/simply_stored/couch/views/array_property_view_spec.rb",
      "lib/simply_stored/couch/views/deleted_model_view_spec.rb",

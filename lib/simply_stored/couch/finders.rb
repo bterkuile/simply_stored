@@ -8,9 +8,21 @@ module SimplyStored
           options[:descending] = true if order == :desc
         end
         
+        # Add limit and skip to options if requested
+        if ([:page, :per_page] | options.keys).any? # Pagination active
+          page = [options.delete(:page).to_i, 1].max
+          per_page = options.delete(:per_page).to_i # Can be string
+          per_page = 22 unless per_page > 0 # Nill will be 0
+          options[:limit] = per_page
+          options[:skip] = (page - 1) * options[:limit]
+        else
+          page = 1
+          per_page = 22
+        end
+        
         with_deleted = options.delete(:with_deleted)
         
-        case what
+        result = case what
         when :all
           if with_deleted || !soft_deleting_enabled?
             CouchPotato.database.view(all_documents(*args))
@@ -31,6 +43,23 @@ module SimplyStored
           end
           document
         end
+        result.instance_eval <<-PAGINATION, __FILE__, __LINE__
+          unless respond_to?(:total_pages)
+            def #{total_pages_method}
+              1
+            end
+          end
+          def #{current_page_method}
+            #{page}
+          end
+          def #{num_pages_method}
+            (total_rows.to_f / #{per_page}).ceil
+          end
+          def #{per_page_method}
+            #{per_page}
+          end
+        PAGINATION
+        result
       end
       
       def all(*args)
