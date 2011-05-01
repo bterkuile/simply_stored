@@ -9,7 +9,7 @@ module SimplyStored
         end
         
         # Add limit and skip to options if requested
-        if ([:page, :per_page] | options.keys).any? # Pagination active
+        if ([:page, :per_page] & options.keys).any? # Pagination active
           page = [options.delete(:page).to_i, 1].max
           per_page = options.delete(:per_page).to_i # Can be string
           per_page = 22 unless per_page > 0 # Nill will be 0
@@ -31,9 +31,9 @@ module SimplyStored
           end
         when :first
           if with_deleted || !soft_deleting_enabled?
-            CouchPotato.database.view(all_documents(:limit => 1, :include_docs => true)).first
+            CouchPotato.database.view(all_documents(options.update(:limit => 1, :include_docs => true))).first
           else
-            CouchPotato.database.view(all_documents_without_deleted(:limit => 1, :include_docs => true)).first
+            CouchPotato.database.view(all_documents_without_deleted(options.update(:limit => 1, :include_docs => true))).first
           end
         else          
           raise SimplyStored::Error, "Can't load record without an id" if what.nil?
@@ -71,7 +71,8 @@ module SimplyStored
       end
 
       def last(*args)
-        find(:first, {:order => :desc}, *args)
+        options = args.last.is_a?(Hash) ? args.last : {}
+        find(:first, options.update(:order => :desc))
       end
 
       def count(options = {})
