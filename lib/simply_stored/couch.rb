@@ -5,7 +5,7 @@ require 'active_support'
 unless {}.respond_to?(:assert_valid_keys)
   require 'active_support/core_ext'
 end
-
+I18n.load_path << File.join(File.expand_path(File.dirname(__FILE__)), 'locale', 'en.yml')
 require File.expand_path(File.dirname(__FILE__) + '/../simply_stored')
 require 'simply_stored/couch/validations'
 require 'simply_stored/couch/association_property'
