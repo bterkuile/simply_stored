@@ -43,22 +43,25 @@ module SimplyStored
           end
           document
         end
-        result.instance_eval <<-PAGINATION, __FILE__, __LINE__
-          unless respond_to?(:total_pages)
-            def #{total_pages_method}
-              1
+        if result
+          result.instance_eval <<-PAGINATION, __FILE__, __LINE__
+            unless respond_to?(:total_rows)
+              def total_rows
+                1
+              end
             end
-          end
-          def #{current_page_method}
-            #{page}
-          end
-          def #{num_pages_method}
-            (total_rows.to_f / #{per_page}).ceil
-          end
-          def #{per_page_method}
-            #{per_page}
-          end
-        PAGINATION
+            def #{current_page_method}
+              #{page}
+            end
+            def #{num_pages_method}
+              return 1 if total_rows.zero?
+              (total_rows.to_f / #{per_page}).ceil
+            end
+            def #{per_page_method}
+              #{per_page}
+            end
+          PAGINATION
+        end
         result
       end
       
