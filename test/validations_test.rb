@@ -110,7 +110,7 @@ class ValidationsTest < Test::Unit::TestCase
       should 'have a nice error message' do
         assert UniqueUser.create(:name => "Host Master")
         user = UniqueUser.create(:name => "Host Master")
-        assert_equal "is already taken", user.errors.on(:name)
+        assert_equal "is already taken", user.errors[:name]
       end
       
       should 'create a view to check with' do
