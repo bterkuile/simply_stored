@@ -31,7 +31,8 @@ class PaginationTest < Test::Unit::TestCase
       u1 = User.create(:title => 'user1', :created_at => Time.now )
       u2 = User.create(:title => 'user2', :created_at => Time.now + 5.minutes )
       u3 = User.create(:title => 'user3', :created_at => Time.now + 10.minutes )
-      assert_equal u1, User.all(:per_page => 1).first
+      assert_equal [u1, u2, u3], User.all # normal behaviour
+      assert_equal u1, User.all(:per_page => 1).first # default to page 1
       assert_equal u2, User.all(:page => 2, :per_page => 1).first
       assert_equal u3, User.all(:page => 3, :per_page => 1).first
     end
