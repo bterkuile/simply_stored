@@ -1,4 +1,4 @@
-require 'validatable'
+require 'active_model'
 require 'couch_potato'
 
 require 'active_support'
@@ -24,6 +24,7 @@ module SimplyStored
   module Couch
     def self.included(clazz)
       clazz.class_eval do
+        include ActiveModel::Validations
         include CouchPotato::Persistence
         include InstanceMethods
         extend ClassMethods
