@@ -31,6 +31,11 @@ end
 
 class Comment
   include SimplyStored::Couch
+
+  total_pages_method 'total_pages_modified'
+  current_page_method 'current_page_modified'
+  num_pages_method 'num_pages_modified'
+  per_page_method 'per_page_modified'
   
   belongs_to :user
   belongs_to :network
