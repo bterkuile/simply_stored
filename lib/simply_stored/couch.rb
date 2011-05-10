@@ -7,6 +7,7 @@ unless {}.respond_to?(:assert_valid_keys)
 end
 I18n.load_path << File.join(File.expand_path(File.dirname(__FILE__)), 'locale', 'en.yml')
 require File.expand_path(File.dirname(__FILE__) + '/../simply_stored')
+require 'simply_stored/couch/database'
 require 'simply_stored/couch/validations'
 require 'simply_stored/couch/association_property'
 require 'simply_stored/couch/properties'
@@ -41,6 +42,7 @@ module SimplyStored
     
     module ClassMethods
       include SimplyStored::ClassMethods::Base
+      include SimplyStored::Couch::Database
       include SimplyStored::Couch::Validations
       include SimplyStored::Couch::Properties
       include SimplyStored::Couch::BelongsTo

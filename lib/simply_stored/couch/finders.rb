@@ -25,19 +25,19 @@ module SimplyStored
         result = case what
         when :all
           if with_deleted || !soft_deleting_enabled?
-            CouchPotato.database.view(all_documents(*args))
+            database.view(all_documents(*args))
           else
-            CouchPotato.database.view(all_documents_without_deleted(options.update(:include_docs => true)))
+            database.view(all_documents_without_deleted(options.update(:include_docs => true)))
           end
         when :first
           if with_deleted || !soft_deleting_enabled?
-            CouchPotato.database.view(all_documents(options.update(:limit => 1, :include_docs => true))).first
+            database.view(all_documents(options.update(:limit => 1, :include_docs => true))).first
           else
-            CouchPotato.database.view(all_documents_without_deleted(options.update(:limit => 1, :include_docs => true))).first
+            database.view(all_documents_without_deleted(options.update(:limit => 1, :include_docs => true))).first
           end
         else          
           raise SimplyStored::Error, "Can't load record without an id" if what.nil?
-          document = CouchPotato.database.load_document(what)
+          document = database.load_document(what)
           if document.nil? or !document.is_a?(self) or (document.deleted? && !with_deleted)
             raise(SimplyStored::RecordNotFound, "#{self.name} could not be found with #{what.inspect}")
           end
@@ -83,9 +83,9 @@ module SimplyStored
         with_deleted = options[:with_deleted]
         
         if with_deleted || !soft_deleting_enabled?
-          CouchPotato.database.view(all_documents(:reduce => true))
+          database.view(all_documents(:reduce => true))
         else
-          CouchPotato.database.view(all_documents_without_deleted(:reduce => true))
+          database.view(all_documents_without_deleted(:reduce => true))
         end
       end
     end

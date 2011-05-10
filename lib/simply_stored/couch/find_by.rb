@@ -28,9 +28,9 @@ module SimplyStored
             
             if soft_deleting_enabled? && !with_deleted
               key_args = key_args + [nil] # deleted_at
-              CouchPotato.database.view(send(without_deleted_view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :limit => 1, :include_docs => true)).first
+              database.view(send(without_deleted_view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :limit => 1, :include_docs => true)).first
             else
-              CouchPotato.database.view(send(view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :limit => 1, :include_docs => true)).first
+              database.view(send(view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :limit => 1, :include_docs => true)).first
             end
           end
         end
@@ -65,9 +65,9 @@ module SimplyStored
             
             if soft_deleting_enabled? && !with_deleted
               key_args = key_args + [nil] # deleted_at
-              CouchPotato.database.view(send(without_deleted_view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :include_docs => true))
+              database.view(send(without_deleted_view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :include_docs => true))
             else
-              CouchPotato.database.view(send(view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :include_docs => true))
+              database.view(send(view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :include_docs => true))
             end
           end
         end
@@ -99,9 +99,9 @@ module SimplyStored
             
             if soft_deleting_enabled? && !with_deleted
               key_args = key_args + [nil] # deleted_at
-              CouchPotato.database.view(send(without_deleted_view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :reduce => true))
+              database.view(send(without_deleted_view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :reduce => true))
             else
-              CouchPotato.database.view(send(view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :reduce => true))
+              database.view(send(view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :reduce => true))
             end
             
           end

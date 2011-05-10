@@ -24,6 +24,8 @@ Gem::Specification.new do |s|
      "lib/simply_stored/class_methods_base.rb",
      "lib/simply_stored/couch.rb",
      "lib/simply_stored/couch/association_property.rb",
+     "lib/simply_stored/couch/database.rb",
+     "lib/simply_stored/couch/belongs_to.rb",
      "lib/simply_stored/couch/belongs_to.rb",
      "lib/simply_stored/couch/ext/couch_potato.rb",
      "lib/simply_stored/couch/find_by.rb",
@@ -39,7 +41,8 @@ Gem::Specification.new do |s|
      "lib/simply_stored/couch/views/deleted_model_view_spec.rb",
      "lib/simply_stored/instance_methods.rb",
      "lib/simply_stored/rake.rb",
-     "lib/simply_stored/storage.rb"
+     "lib/simply_stored/storage.rb",
+     "lib/simply_stored/locale/en.yml"
   ]
   s.homepage = %q{http://github.com/peritor/simply_stored}
   s.rdoc_options = ["--charset=UTF-8"]

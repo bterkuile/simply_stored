@@ -16,13 +16,13 @@ module SimplyStored
 
     def save(validate = true)
       retry_on_conflict do
-        CouchPotato.database.save_document(self, validate)
+        self.class.database.save_document(self, validate)
       end
     end
 
     def save!
       retry_on_conflict do
-        CouchPotato.database.save_document!(self)
+        self.class.database.save_document!(self)
       end
     end
 
@@ -32,7 +32,7 @@ module SimplyStored
         _mark_as_deleted
       else
         self.skip_callbacks = true if self.class.soft_deleting_enabled? && deleted?
-        CouchPotato.database.destroy_document(self)
+        self.class.database.destroy_document(self)
         freeze
       end
     end
@@ -197,11 +197,11 @@ module SimplyStored
       view_options = _default_view_options(options)
 
       if options[:with_deleted]
-        CouchPotato.database.view(
+        self.class.database.view(
           self.class.get_class_from_name(from).send(
             "association_#{from.to_s.singularize.underscore}_belongs_to_#{foreign_key}_with_deleted", view_options))
       else
-        CouchPotato.database.view(
+        self.class.database.view(
           self.class.get_class_from_name(from).send(
             "association_#{from.to_s.singularize.underscore}_belongs_to_#{foreign_key}", view_options))
       end
@@ -213,11 +213,11 @@ module SimplyStored
       view_options[:include_docs] = false
 
       if options[:with_deleted]
-        CouchPotato.database.view(
+        self.class.database.view(
           self.class.get_class_from_name(from).send(
             "association_#{from.to_s.singularize.underscore}_belongs_to_#{to.name.singularize.underscore}_with_deleted", view_options))
       else
-        CouchPotato.database.view(
+        self.class.database.view(
           self.class.get_class_from_name(from).send(
             "association_#{from.to_s.singularize.underscore}_belongs_to_#{to.name.singularize.underscore}", view_options))
       end
@@ -228,11 +228,11 @@ module SimplyStored
       view_options = _default_view_options(options)
 
       if options[:with_deleted]
-        CouchPotato.database.view(
+        self.class.database.view(
           self.class.get_class_from_name(from).send(
             "association_#{from.to_s.singularize.underscore}_has_and_belongs_to_many_#{to.to_s.pluralize.underscore}_with_deleted", view_options))
       else
-        CouchPotato.database.view(
+        self.class.database.view(
           self.class.get_class_from_name(from).send(
             "association_#{from.to_s.singularize.underscore}_has_and_belongs_to_many_#{to.to_s.pluralize.underscore}", view_options))
       end
@@ -244,11 +244,11 @@ module SimplyStored
       view_options[:include_docs] = false
 
       if options[:with_deleted]
-        CouchPotato.database.view(
+        self.class.database.view(
           self.class.get_class_from_name(from).send(
             "association_#{from.to_s.singularize.underscore}_has_and_belongs_to_many_#{to.to_s.pluralize.underscore}_with_deleted", view_options))
       else
-        CouchPotato.database.view(
+        self.class.database.view(
           self.class.get_class_from_name(from).send(
             "association_#{from.to_s.singularize.underscore}_has_and_belongs_to_many_#{to.to_s.pluralize.underscore}", view_options))
       end
