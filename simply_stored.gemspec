@@ -36,6 +36,7 @@ Gem::Specification.new do |s|
      "lib/simply_stored/couch/properties.rb",
      "lib/simply_stored/couch/validations.rb",
      "lib/simply_stored/couch/pagination.rb",
+     "lib/simply_stored/couch/pagination_options.rb",
      "lib/simply_stored/couch/views.rb",
      "lib/simply_stored/couch/views/array_property_view_spec.rb",
      "lib/simply_stored/couch/views/deleted_model_view_spec.rb",
@@ -86,7 +87,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rest-client>, [">= 1.4.2"])
     s.add_dependency(%q<couch_potato>, [">= 0.2.15"])
     s.add_dependency(%q<activesupport>, [">= 0"])
-    s.add_dependency(%q<mattmatt-validatable>, [">= 0"])
   end
 end
 
