@@ -72,7 +72,14 @@ module SimplyStored
               klass = self.class.get_class_from_name(self.class._find_property(name).options[:class_name])
               raise ArgumentError, "expected #{klass} got #{value.class}" unless value.nil? || value.is_a?(klass)
 
-              send("#{name}_will_change!") if value != instance_variable_get("@#{name}") # Mark changed if different
+              # Has many object update
+              if value
+                value_has_many_name = klass.properties.find{|p| p.is_a?(SimplyStored::Couch::HasMany::Property) && p.options[:class_name] == self.class.name}.try(:name)
+                value.send(value_has_many_name) << self unless !value_has_many_name || value.send(value_has_many_name).include?(self)
+              end
+
+              # Mark changed if appropriate
+              send("#{name}_will_change!") if value != instance_variable_get("@#{name}")
 
               instance_variable_set("@#{name}", value)
               if value.nil?
