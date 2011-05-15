@@ -3,7 +3,7 @@ module SimplyStored
     module FindBy
       include PaginationOptions
       def _define_find_by(name, *args)
-        keys = name.to_s.gsub(/^find_by_/, "").split("_and_")
+        keys = name.to_s.gsub(/^find_by_/, "").split("_and_").map(&:to_sym)
         view_name = name.to_s.gsub(/^find_/, "").to_sym
         view_keys = keys.length == 1 ? keys.first : keys
         without_deleted_view_name = "#{view_name}_withoutdeleted"
