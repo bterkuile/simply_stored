@@ -68,7 +68,7 @@ module SimplyStored
               
               if soft_deleting_enabled? && !with_deleted
                 key_args = key_args + [nil] # deleted_at
-                database.view(send(without_deleted_view_name, options.merge(:key => (key_args.size == 1 ? key_args.first : key_args)), :include_docs => true))
+                database.view(send(without_deleted_view_name, options.merge(:key => (key_args.size == 1 ? key_args.first : key_args), :include_docs => true)))
               else
                 database.view(send(view_name, options.merge(:key => (key_args.size == 1 ? key_args.first : key_args), :include_docs => true)))
               end
