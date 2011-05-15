@@ -138,6 +138,24 @@ class BelongsToTest < Test::Unit::TestCase
         post.save!
         assert !post.user_changed?
       end
+
+      should "have a proper _was value" do
+        user = User.create(:title => "Mr.")
+        user2 = User.create(:title => "Mrs.")
+        post = Post.new
+
+        post.save
+        assert_nil post.user
+        assert_nil post.user_id
+
+        post.user = user
+        assert_nil post.user_was
+        assert_nil post.user_id_was
+
+        post.user = user2
+        assert_equal user, post.user_was
+        assert_equal user.id, post.user_id_was
+      end
       
       should "handle a foreign_key of '' as nil" do
         post = Post.create

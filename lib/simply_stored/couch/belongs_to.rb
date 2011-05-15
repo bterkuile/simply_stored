@@ -56,7 +56,6 @@ module SimplyStored
           @options.assert_valid_keys(:class_name)
 
           owner_clazz.class_eval do
-            attr_accessor :"#{name}_id_was"
             property :"#{name}_id"
             
             define_method name do |*args|
@@ -73,36 +72,19 @@ module SimplyStored
               klass = self.class.get_class_from_name(self.class._find_property(name).options[:class_name])
               raise ArgumentError, "expected #{klass} got #{value.class}" unless value.nil? || value.is_a?(klass)
 
+              send("#{name}_will_change!") if value != instance_variable_get("@#{name}") # Mark changed if different
+
               instance_variable_set("@#{name}", value)
               if value.nil?
-                instance_variable_set("@#{name}_id", nil)
+                send("#{name}_id=", nil)
               else
-                instance_variable_set("@#{name}_id", value.id)
+                send("#{name}_id=", value.id)
               end
-            end
-
-            define_method "#{name}_id=" do |id|
-              remove_instance_variable("@#{name}") if instance_variable_defined?("@#{name}")
-              instance_variable_set("@#{name}_id", id)
-            end
-            
-            define_method "#{name}_changed?" do
-              self.send("#{name}_id") != self.send("#{name}_id_was")
             end
           end
         end
-      
-        def dirty?(object)
-          object.send("#{name}_id_was") != object.send("#{name}_id")
-        end
-        
-        def reset_dirty_attribute(object)
-          object.send("#{name}_id_was=", object.send("#{name}_id"))
-        end
-        
         def build(object, json)
           object.send "#{name}_id=", json["#{name}_id"]
-          object.send "#{name}_id_was=", json["#{name}_id"]
         end
       
         def serialize(json, object)

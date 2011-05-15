@@ -18,12 +18,18 @@ module SimplyStored
       retry_on_conflict do
         self.class.database.save_document(self, validate)
       end
+      # ActiveModel implementations
+      @previously_changed = changes
+      @changed_attributes.clear
     end
 
     def save!
       retry_on_conflict do
         self.class.database.save_document!(self)
       end
+      # ActiveModel implementations
+      @previously_changed = changes
+      @changed_attributes.clear
     end
 
     def destroy(override_soft_delete=false)
