@@ -36,5 +36,18 @@ class PaginationTest < Test::Unit::TestCase
       assert_equal u2, User.all(:page => 2, :per_page => 1).first
       assert_equal u3, User.all(:page => 3, :per_page => 1).first
     end
+
+    should "paginate find_all_by finders" do
+      6.times{|i| User.create(:title => "user#{i}", :homepage => 'http://localhost/1') }
+      9.times{|i| User.create(:title => "user#{i + 6}", :homepage => 'http://localhost/2') }
+      assert_equal 15, User.count
+      assert_equal 6, User.find_all_by_homepage('http://localhost/1').size
+      result = User.find_all_by_homepage('http://localhost/1', :page => 2, :per_page => 2)
+      assert_equal 2, result.current_page
+      assert_equal 2, result.per_page
+      assert_equal ['user2', 'user3'], result.map(&:title).sort
+      assert_equal 6, result.total_entries
+      assert_equal 3, result.num_pages
+    end
   end
 end
