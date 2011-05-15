@@ -261,10 +261,10 @@ module SimplyStored
     end
 
     def _mark_as_deleted
-      run_callbacks(:before_destroy)
-      send("#{self.class.soft_delete_attribute}=", Time.now)
-      save(false)
-      run_callbacks(:after_destroy)
+      _run_destroy_callbacks do
+        send("#{self.class.soft_delete_attribute}=", Time.now)
+        save(false)
+      end
     end
     
   end
