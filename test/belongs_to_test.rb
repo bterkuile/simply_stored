@@ -156,6 +156,28 @@ class BelongsToTest < Test::Unit::TestCase
         assert_equal user, post.user_was
         assert_equal user.id, post.user_id_was
       end
+
+      should "set the parent object on has_many association" do
+        # Copy from has_many, but belongs here as well
+        User.expects(:find).never
+        user = User.create(:title => "Mr.")
+        3.times {
+          post = Post.new
+          post.user = user
+          post.save!
+        }
+        post = user.posts.first
+        assert_equal user, user.posts.first.user
+      end
+
+      should "set the parent object on has_one association" do
+        # Taken from has_one, but belongs here as well
+        Instance.expects(:find).never
+        instance = Instance.create
+        identity = Identity.create(:instance => instance)
+
+        assert_equal instance, instance.identity.instance
+      end
       
       should "handle a foreign_key of '' as nil" do
         post = Post.create
