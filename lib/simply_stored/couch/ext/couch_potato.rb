@@ -4,6 +4,9 @@ module CouchPotato
       private
       
       def reset_dirty_attributes
+        # ActiveModel cleaning
+        @changed_attributes.clear
+
         self.class.properties.each do |property|
           if !property.respond_to?(:supports_dirty?) || property.supports_dirty?
             property.respond_to?(:reset_dirty_attribute) ? property.reset_dirty_attribute(self) :
