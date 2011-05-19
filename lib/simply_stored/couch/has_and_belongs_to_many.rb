@@ -42,7 +42,7 @@ module SimplyStored
           }
         eos
 
-        view "association_#{self.name.underscore}_has_and_belongs_to_many_#{name}",
+        view "association_#{self.name.underscore.gsub('/', '__')}_has_and_belongs_to_many_#{name}",
           :map => map_definition_without_deleted,
           :reduce => reduce_definition,
           :type => "custom",
@@ -58,7 +58,7 @@ module SimplyStored
           }
         eos
 
-        view "association_#{self.name.underscore}_has_and_belongs_to_many_#{name}_with_deleted",
+        view "association_#{self.name.underscore.gsub('/', '__')}_has_and_belongs_to_many_#{name}_with_deleted",
           :map => map_definition_with_deleted,
           :reduce => reduce_definition,
           :type => "custom",
@@ -137,7 +137,7 @@ module SimplyStored
       end
       
       def define_has_and_belongs_to_many_count(name, options, through = nil)
-        method_name = name.to_s.singularize.underscore + "_count"
+        method_name = name.to_s.singularize.underscore.gsub('/', '__') + "_count"
         define_method(method_name) do |*args|
           local_options = args.first && args.first.is_a?(Hash) && args.first
           forced_reload, with_deleted, limit, descending = extract_association_options(local_options)
@@ -173,9 +173,9 @@ module SimplyStored
           # there is only one pair of foreign_keys and it usualy the name of the class not storing the keys
           if options[:foreign_key].blank?
             if options[:storing_keys]
-              options[:foreign_key] = options[:class_name].singularize.underscore.foreign_key.pluralize
+              options[:foreign_key] = options[:class_name].singularize.underscore.gsub('/', '__').foreign_key.pluralize
             else
-              options[:foreign_key] = owner_clazz.name.singularize.underscore.foreign_key.pluralize
+              options[:foreign_key] = owner_clazz.name.singularize.underscore.gsub('/', '__').foreign_key.pluralize
             end
           end
           options[:class_storing_keys] = options[:storing_keys] ? owner_clazz.name : options[:class_name]

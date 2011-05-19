@@ -47,7 +47,7 @@ module SimplyStored
             intermediate_objects = find_associated(through, self.class, :with_deleted => with_deleted, :limit => limit, :foreign_key => options[:foreign_key])
             
             through_objects = intermediate_objects.map do |intermediate_object|
-              intermediate_object.send(name.to_s.singularize.underscore, :with_deleted => with_deleted)
+              intermediate_object.send(name.to_s.singularize.underscore.gsub('/', '__'), :with_deleted => with_deleted)
             end.flatten.uniq
             cached_results[cache_key] = through_objects
             instance_variable_set("@#{name}", cached_results)
@@ -102,7 +102,7 @@ module SimplyStored
       end
       
       def define_has_many_count(name, options, through = nil)
-        method_name = name.to_s.singularize.underscore + "_count"
+        method_name = name.to_s.singularize.underscore.gsub('/', '__') + "_count"
         define_method(method_name) do |*args|
           local_options = args.first && args.first.is_a?(Hash) && args.first
           if local_options
