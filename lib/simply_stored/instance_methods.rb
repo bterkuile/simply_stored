@@ -213,6 +213,12 @@ module SimplyStored
       end
     end
     
+    def get_embedded(*args)
+      puts args.inspect
+      debugger
+      []
+    end
+     
     def count_associated(from, to, options = {})
       view_options = _default_view_options(options)
       view_options[:reduce] = true

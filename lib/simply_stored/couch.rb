@@ -15,7 +15,9 @@ require 'simply_stored/couch/properties'
 require 'simply_stored/couch/finders'
 require 'simply_stored/couch/find_by'
 require 'simply_stored/couch/belongs_to'
+require 'simply_stored/couch/embedded_in'
 require 'simply_stored/couch/has_many'
+require 'simply_stored/couch/has_many_embedded'
 require 'simply_stored/couch/has_and_belongs_to_many'
 require 'simply_stored/couch/has_one'
 require 'simply_stored/couch/pagination'
@@ -47,7 +49,9 @@ module SimplyStored
       include SimplyStored::Couch::Validations
       include SimplyStored::Couch::Properties
       include SimplyStored::Couch::BelongsTo
+      include SimplyStored::Couch::EmbeddedIn
       include SimplyStored::Couch::HasMany
+      include SimplyStored::Couch::HasManyEmbedded
       include SimplyStored::Couch::HasAndBelongsToMany
       include SimplyStored::Couch::HasOne
       include SimplyStored::Couch::Finders
