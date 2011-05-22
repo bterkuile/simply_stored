@@ -27,12 +27,9 @@ require 'simply_stored/couch/views'
 module SimplyStored
   module Couch
     def self.included(clazz)
-      clazz.class_eval do
-        include ActiveModel::Validations
-        include CouchPotato::Persistence
-        include InstanceMethods
-        extend ClassMethods
-      end
+      clazz.send(:include, CouchPotato::Persistence)
+      clazz.send(:include, InstanceMethods)
+      clazz.send(:extend, ClassMethods)
       
       clazz.instance_eval do
         attr_accessor :_accessible_attributes, :_protected_attributes
