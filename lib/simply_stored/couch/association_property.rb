@@ -21,7 +21,6 @@ module SimplyStored
       def association?
         true
       end
-
     end
   end
 end

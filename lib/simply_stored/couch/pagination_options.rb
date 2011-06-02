@@ -6,7 +6,6 @@ module SimplyStored
         # If none given, default fallback will be total_rows
         # This is not true for a paginated find_all_by construction
         total_entries = options.delete(:total_entries)
-
         # Add limit and skip to options if requested
         if ([:page, :per_page] & options.keys).any? # Pagination active
           page = [options.delete(:page).to_i, 1].max
@@ -14,6 +13,11 @@ module SimplyStored
           per_page = 22 unless per_page > 0 # Nill will be 0
           options[:limit] = per_page
           options[:skip] = (page - 1) * options[:limit]
+        elsif options[:offset] && options[:limit] # Sql syntax support
+          options[:skip] = options.delete(:offset)
+          options.delete(:order)
+          page = (options[:skip].to_i / options[:limit].to_i).floor.succ
+          per_page = options[:limit]
         else
           page = 1
           per_page = 22

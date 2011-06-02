@@ -6,7 +6,7 @@ module SimplyStored
 
       def belongs_to(name, options = {})
         check_existing_properties(name, SimplyStored::Couch::BelongsTo::Property)
-
+        association_foreign_property = (options[:class_name] || find_association_class_name(name)).constantize.foreign_property
         map_definition_without_deleted = <<-eos
           function(doc) { 
             if (doc['ruby_class'] == '#{self.to_s}' && doc['#{name.to_s}_id'] != null) {
@@ -20,8 +20,7 @@ module SimplyStored
         eos
         
         reduce_definition = "_sum"
-         
-        view "association_#{self.name.underscore.gsub('/', '__')}_belongs_to_#{name}",
+        view "association_#{foreign_property}_belongs_to_#{association_foreign_property}",
           :map => map_definition_without_deleted,
           :reduce => reduce_definition,
           :type => "custom",
@@ -35,7 +34,7 @@ module SimplyStored
           }
         eos
          
-        view "association_#{self.name.underscore.gsub('/', '__')}_belongs_to_#{name}_with_deleted",
+        view "association_#{foreign_property}_belongs_to_#{association_foreign_property}_with_deleted",
           :map => map_definition_with_deleted,
           :reduce => reduce_definition,
           :type => "custom",
@@ -50,7 +49,7 @@ module SimplyStored
         def initialize(owner_clazz, name, options = {})
           @name = name
           @options = {
-            :class_name => name.to_s.singularize.camelize
+            :class_name => owner_clazz.find_association_class_name(name)
           }.update(options)
 
           @options.assert_valid_keys(:class_name)
@@ -65,7 +64,7 @@ module SimplyStored
               with_deleted = local_options[:with_deleted] || false
               
               return instance_variable_get("@#{name}") unless instance_variable_get("@#{name}").nil? or forced_reload
-              instance_variable_set("@#{name}", send("#{name}_id").present? ? Object.const_get(self.class._find_property(name).options[:class_name]).find(send("#{name}_id"), :with_deleted => with_deleted) : nil)
+              instance_variable_set("@#{name}", send("#{name}_id").present? ? self.class._find_property(name).options[:class_name].constantize.find(send("#{name}_id"), :with_deleted => with_deleted) : nil)
             end
           
             define_method "#{name}=" do |value|
@@ -102,7 +101,7 @@ module SimplyStored
           json["#{name}_id"] = object.send("#{name}_id") if object.send("#{name}_id")
         end
         alias :value :serialize
-            
+
         def association?
           true
         end

@@ -135,7 +135,7 @@ module SimplyStored
           options = {
             :dependent => :nullify,
             :through => nil,
-            :class_name => name.to_s.singularize.camelize,
+            :class_name => owner_clazz.find_association_class_name(name),
             :foreign_key => nil
           }.update(options)
           @name, @options = name, options
