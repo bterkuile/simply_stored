@@ -15,21 +15,23 @@ module SimplyStored
     end
 
     def save(validate = true)
-      retry_on_conflict do
+      result = retry_on_conflict do
         self.class.database.save_document(self, validate)
       end
       # ActiveModel implementations
       @previously_changed = changes
       @changed_attributes.clear
+      return result
     end
 
     def save!
-      retry_on_conflict do
+      result = retry_on_conflict do
         self.class.database.save_document!(self)
       end
       # ActiveModel implementations
       @previously_changed = changes
       @changed_attributes.clear
+      return result
     end
 
     def destroy(override_soft_delete=false)
@@ -199,17 +201,17 @@ module SimplyStored
     end
     
     def find_associated(from, to, options = {})
-      foreign_key = (options.delete(:foreign_key) || self.class.name.singularize.underscore.foreign_key ).gsub(/_id$/, '')
+      foreign_key = (options.delete(:foreign_key) || self.class.name.singularize.underscore.gsub('/', '__').foreign_key ).gsub(/_id$/, '')
       view_options = _default_view_options(options)
 
       if options[:with_deleted]
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore}_belongs_to_#{foreign_key}_with_deleted", view_options))
+            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}_belongs_to_#{foreign_key}_with_deleted", view_options))
       else
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore}_belongs_to_#{foreign_key}", view_options))
+            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}_belongs_to_#{foreign_key}", view_options))
       end
     end
     
@@ -227,11 +229,11 @@ module SimplyStored
       if options[:with_deleted]
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore}_belongs_to_#{to.name.singularize.underscore}_with_deleted", view_options))
+            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}_with_deleted", view_options))
       else
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore}_belongs_to_#{to.name.singularize.underscore}", view_options))
+            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}", view_options))
       end
     end
     
@@ -242,11 +244,11 @@ module SimplyStored
       if options[:with_deleted]
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore}_has_and_belongs_to_many_#{to.to_s.pluralize.underscore}_with_deleted", view_options))
+            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}_with_deleted", view_options))
       else
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore}_has_and_belongs_to_many_#{to.to_s.pluralize.underscore}", view_options))
+            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}", view_options))
       end
     end
     
@@ -258,11 +260,11 @@ module SimplyStored
       if options[:with_deleted]
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore}_has_and_belongs_to_many_#{to.to_s.pluralize.underscore}_with_deleted", view_options))
+            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}_with_deleted", view_options))
       else
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore}_has_and_belongs_to_many_#{to.to_s.pluralize.underscore}", view_options))
+            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}", view_options))
       end
     end
 
