@@ -4,12 +4,15 @@ module SimplyStored
     module EmbeddedIn
       include SimplyStored::Couch::Properties
 
-      def embedded_in(name, options = {})
+      def is_embedded_in(name, options = {})
         check_existing_properties(name, SimplyStored::Couch::BelongsTo::Property)
+        parent = options[:class_name] || name.to_s.camelize
+        self.name.property_name.pluralize
 
         map_definition_without_deleted = <<-eos
           function(doc) { 
-            if (doc['ruby_class'] == '#{self.to_s}' && doc['#{name.to_s}_id'] != null) {
+            if (doc['ruby_class'] == '#{parent}') {
+              if(typeof(doc['']))
               if (doc['#{soft_delete_attribute}'] && doc['#{soft_delete_attribute}'] != null){
                 // "soft" deleted
               }else{
@@ -55,9 +58,39 @@ module SimplyStored
 
           @options.assert_valid_keys(:class_name)
 
+          # For now restrictions on naming
+          parent_property_name = owner_clazz.name.property_name.pluralize
+
           owner_clazz.class_eval do
             property :"#{name}_id"
+            attr_accessor :parent_object
             
+            view :all_documents, :type => :raw, :include_docs => true, :map => %{
+              function(doc){
+                if(doc['ruby_class'] == '#{name.to_s.singularize.camelize}' && typeof(doc['#{parent_property_name}']) == 'object'){
+                  for(var i=0; i < doc['#{parent_property_name}'].length; i++){
+                    emit(doc['#{parent_property_name}'][i]['created_at'], doc['#{parent_property_name}'][i]);
+                  }
+                }
+              }
+            }, :results_filter => lambda{|results| results['rows'].map{|row| row['value']}}
+
+            # For now empty merge. Since value of map function is transformed to object
+            define_method :merge do |*args|
+            end
+
+            define_method :save do |callbacks=true|
+              if callbacks
+                _run_save_callbacks do
+                  parent_object.is_dirty if self.dirty?
+                  parent_object.save
+                end
+              else
+                parent_object.is_dirty if self.dirty?
+                parent_object.save
+              end
+            end
+
             define_method name do |*args|
               local_options = args.last.is_a?(Hash) ? args.last : {}
               local_options.assert_valid_keys(:force_reload, :with_deleted)
@@ -89,6 +122,7 @@ module SimplyStored
               if value.nil?
                 send("#{name}_id=", nil)
               else
+                debugger
                 send("#{name}_id=", value.id)
               end
             end

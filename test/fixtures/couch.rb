@@ -19,6 +19,13 @@ class Post
   include SimplyStored::Couch
   
   belongs_to :user
+  has_many_embedded :embedded_comments
+end
+
+class EmbeddedComment
+  include SimplyStored::Couch
+  property :body
+  is_embedded_in :post
 end
 
 class StrictPost
