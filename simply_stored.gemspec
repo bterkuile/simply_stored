@@ -77,12 +77,10 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<rest-client>, [">= 1.4.2"])
       s.add_runtime_dependency(%q<couch_potato>, [">= 0.2.15"])
       s.add_runtime_dependency(%q<activesupport>, [">= 0"])
-      s.add_runtime_dependency(%q<mattmatt-validatable>, [">= 0"])
     else
       s.add_dependency(%q<rest-client>, [">= 1.4.2"])
       s.add_dependency(%q<couch_potato>, [">= 0.2.15"])
       s.add_dependency(%q<activesupport>, [">= 0"])
-      s.add_dependency(%q<mattmatt-validatable>, [">= 0"])
     end
   else
     s.add_dependency(%q<rest-client>, [">= 1.4.2"])
