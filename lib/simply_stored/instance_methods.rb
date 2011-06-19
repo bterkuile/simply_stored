@@ -201,17 +201,17 @@ module SimplyStored
     end
     
     def find_associated(from, to, options = {})
-      foreign_key = (options.delete(:foreign_key) || self.class.name.singularize.underscore.gsub('/', '__').foreign_key ).gsub(/_id$/, '')
+      foreign_key = (options.delete(:foreign_key) || self.class.name.singularize.property_name.foreign_key).gsub(/_id$/, '')
       view_options = _default_view_options(options)
 
       if options[:with_deleted]
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}_belongs_to_#{foreign_key}_with_deleted", view_options))
+            "association_#{from.to_s.singularize.property_name}_belongs_to_#{foreign_key}_with_deleted", view_options))
       else
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}_belongs_to_#{foreign_key}", view_options))
+            "association_#{from.to_s.singularize.property_name}_belongs_to_#{foreign_key}", view_options))
       end
     end
     
@@ -229,11 +229,11 @@ module SimplyStored
       if options[:with_deleted]
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}_with_deleted", view_options))
+            "association_#{from.to_s.singularize.property_name}_belongs_to_#{to.name.singularize.property_name}_with_deleted", view_options))
       else
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}", view_options))
+            "association_#{from.to_s.singularize.property_name}_belongs_to_#{to.name.singularize.property_name}", view_options))
       end
     end
     
@@ -244,11 +244,11 @@ module SimplyStored
       if options[:with_deleted]
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}_with_deleted", view_options))
+            "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}_with_deleted", view_options))
       else
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}", view_options))
+            "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}", view_options))
       end
     end
     
@@ -260,16 +260,16 @@ module SimplyStored
       if options[:with_deleted]
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}_with_deleted", view_options))
+            "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}_with_deleted", view_options))
       else
         self.class.database.view(
           self.class.get_class_from_name(from).send(
-            "association_#{from.to_s.singularize.underscore.gsub('/', '__')}", view_options))
+            "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}", view_options))
       end
     end
 
     def _mark_as_deleted
-      run_callbacks :destroy do
+      _run_destroy_callbacks do
         send("#{self.class.soft_delete_attribute}=", Time.now)
         save(false)
       end

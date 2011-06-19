@@ -6,7 +6,7 @@ module SimplyStored
 
       def belongs_to(name, options = {})
         check_existing_properties(name, SimplyStored::Couch::BelongsTo::Property)
-        association_foreign_property = (options[:class_name] || find_association_class_name(name)).constantize.foreign_property
+
         map_definition_without_deleted = <<-eos
           function(doc) { 
             if (doc['ruby_class'] == '#{self.to_s}' && doc['#{name.to_s}_id'] != null) {
@@ -20,7 +20,7 @@ module SimplyStored
         eos
         
         reduce_definition = "_sum"
-        view "association_#{foreign_property}_belongs_to_#{association_foreign_property}",
+        view "association_#{foreign_property}_belongs_to_#{name}",
           :map => map_definition_without_deleted,
           :reduce => reduce_definition,
           :type => "custom",
@@ -34,7 +34,7 @@ module SimplyStored
           }
         eos
          
-        view "association_#{foreign_property}_belongs_to_#{association_foreign_property}_with_deleted",
+        view "association_#{foreign_property}_belongs_to_#{name}_with_deleted",
           :map => map_definition_with_deleted,
           :reduce => reduce_definition,
           :type => "custom",
