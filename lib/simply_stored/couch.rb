@@ -54,6 +54,7 @@ module SimplyStored
       include SimplyStored::Couch::Finders
       include SimplyStored::Couch::FindBy
       include SimplyStored::Couch::Pagination
+      include SimplyStored::Couch::PaginationOptions
       include SimplyStored::Storage::ClassMethods
       
       def create(attributes = {}, &blk)
