@@ -6,21 +6,29 @@ module SimplyStored
 
       def belongs_to(name, options = {})
         check_existing_properties(name, SimplyStored::Couch::BelongsTo::Property)
+        association_property = if name.to_s.index('__')
+                                 # Already defined properly
+                                 name
+                               elsif rindex = foreign_property.to_s.rindex('__')
+                                 "#{foreign_property[0...rindex]}__#{name}"
+                               else
+                                 name
+                               end
 
         map_definition_without_deleted = <<-eos
           function(doc) { 
-            if (doc['ruby_class'] == '#{self.to_s}' && doc['#{name.to_s}_id'] != null) {
+            if (doc['ruby_class'] == '#{self.to_s}' && doc['#{name}_id'] != null) {
               if (doc['#{soft_delete_attribute}'] && doc['#{soft_delete_attribute}'] != null){
                 // "soft" deleted
               }else{
-                emit([doc.#{name.to_s}_id, doc.created_at], 1);
+                emit([doc.#{name}_id, doc.created_at], 1);
               }
             }
           }
         eos
         
         reduce_definition = "_sum"
-        view "association_#{foreign_property}_belongs_to_#{name}",
+        view "association_#{foreign_property}_belongs_to_#{association_property}",
           :map => map_definition_without_deleted,
           :reduce => reduce_definition,
           :type => "custom",
@@ -28,13 +36,13 @@ module SimplyStored
           
         map_definition_with_deleted = <<-eos
           function(doc) { 
-            if (doc['ruby_class'] == '#{self.to_s}' && doc['#{name.to_s}_id'] != null) {
-              emit([doc.#{name.to_s}_id, doc.created_at], 1);
+            if (doc['ruby_class'] == '#{self.to_s}' && doc['#{name}_id'] != null) {
+              emit([doc.#{name}_id, doc.created_at], 1);
             }
           }
         eos
          
-        view "association_#{foreign_property}_belongs_to_#{name}_with_deleted",
+        view "association_#{foreign_property}_belongs_to_#{association_property}_with_deleted",
           :map => map_definition_with_deleted,
           :reduce => reduce_definition,
           :type => "custom",
