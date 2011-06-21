@@ -7,7 +7,7 @@ class EmbeddingTest < Test::Unit::TestCase
       CouchPotato::Config.database_name = 'simply_stored_test'
       recreate_db
       @post = Post.new
-      @post.embedded_comments= [{'ruby_class' => 'EmbeddedComment', 'body' => 'body1', '_id' => "0"}, {'ruby_class' => 'EmbeddedComment', 'body' => 'body2', '_id' => "1"}]
+      @post.embedded_comments= [{'ruby_class' => 'EmbeddedComment', 'body' => 'body1'}, {'ruby_class' => 'EmbeddedComment', 'body' => 'body2'}]
       @post.save
     end
 
@@ -31,6 +31,10 @@ class EmbeddingTest < Test::Unit::TestCase
 
     should "get embedded object, not a hash" do
       assert_kind_of EmbeddedComment, EmbeddedComment.all.first
+    end
+
+    should "have a parent_object when loaded through all" do
+      assert_equal @post, EmbeddedComment.all.first.parent_object
     end
 
     should "save an instance" do
