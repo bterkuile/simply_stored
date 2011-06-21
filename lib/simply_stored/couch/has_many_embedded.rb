@@ -55,7 +55,6 @@ module SimplyStored
             if value.is_a?(Hash)
               newval = klass.new
               newval._document = value
-              newval.id = (instance_variable_get("@#{name}") || []).size
               newval.updated_at ||= Time.now
               newval.created_at ||= Time.now
             else
@@ -74,7 +73,6 @@ module SimplyStored
           if value.is_a?(Hash)
             newval = klass.new
             newval._document = value
-            newval.id = (instance_variable_get("@#{name}") || []).size
             newval.updated_at ||= Time.now
             newval.created_at ||= Time.now
           else

@@ -73,7 +73,7 @@ module SimplyStored
                   }
                 }
               }
-            }, :results_filter => lambda{|results| results['rows'].map{|row| row['value']}}
+            }, :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d}}
 
             # For now empty merge. Since value of map function is transformed to object
             define_method :merge do |*args|
