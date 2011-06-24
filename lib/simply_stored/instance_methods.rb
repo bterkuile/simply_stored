@@ -168,7 +168,13 @@ module SimplyStored
               else 
                 # nullify
                 unless dependent.class.soft_deleting_enabled? && dependent.deleted?
-                  dependent.send("#{self.class.foreign_property}=", nil)
+                  foreign_property = self.class.foreign_property
+                  foreign_property_without_namespace = foreign_property.to_s.split('__').last 
+                  if dependent.respond_to?("#{foreign_property}=")
+                    dependent.send("#{foreign_property}=", nil)
+                  elsif dependent.respond_to?("#{foreign_property_without_namespace}=")
+                    dependent.send("#{foreign_property_without_namespace}=", nil)
+                  end
                   dependent.save(false)
                 end
               end
