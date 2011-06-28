@@ -172,6 +172,12 @@ class FinderTest < Test::Unit::TestCase
         User.create(:title => "Mr.")
         assert_equal 2, User.find_all_by_title("Mr.").size
       end
+
+      should "find all instances when specifying keys" do
+        User.create :name => 'john', :title => 'Mr.'
+        User.create :name => 'doe', :title => 'Mr.'
+        assert_equal ['doe', 'john'], User.find_all_by_name(:keys => ['john', 'doe', 'jane']).map{|u| u.name}.sort
+      end
       
       should "raise an error if the parameters don't match" do
         assert_raise(ArgumentError) do

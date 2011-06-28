@@ -61,16 +61,19 @@ module SimplyStored
           define_method(name) do |*key_args|
             options = key_args.last.is_a?(Hash) ? key_args.pop : {}
             with_pagination_options(options.update(:total_entries => send(count_name, *key_args))) do |options|
-              options.assert_valid_keys(:with_deleted, :limit, :skip)
+              options.assert_valid_keys(:with_deleted, :limit, :skip, :keys)
               with_deleted = options.delete(:with_deleted)
+              options[:key] = key_args.first if key_args.size == 1
+              options[:key] = key_args if key_args.size > 1
+              options[:include_docs] = true
               
-              raise ArgumentError, "Too many or too few arguments, require #{keys.inspect}" unless keys.size == key_args.size            
-              
+              raise ArgumentError, "Too many or too few arguments, require #{keys.inspect}" unless keys.size == key_args.size || options[:keys]
+
               if soft_deleting_enabled? && !with_deleted
-                key_args = key_args + [nil] # deleted_at
-                database.view(send(without_deleted_view_name, options.merge(:key => (key_args.size == 1 ? key_args.first : key_args), :include_docs => true)))
+                options[:key] = Array.wrap(options[:key]) + [nil] # deleted_at
+                database.view(send(without_deleted_view_name, options))
               else
-                database.view(send(view_name, options.merge(:key => (key_args.size == 1 ? key_args.first : key_args), :include_docs => true)))
+                database.view(send(view_name, options))
               end
             end
           end
@@ -98,14 +101,17 @@ module SimplyStored
         (class << self; self end).instance_eval do
           define_method("#{name}") do |*key_args|
             options = key_args.last.is_a?(Hash) ? key_args.pop : {}
-            options.assert_valid_keys(:with_deleted)
+            options.assert_valid_keys(:with_deleted, :keys)
             with_deleted = options.delete(:with_deleted)
-            
+            options[:key] = key_args.first if key_args.size == 1
+            options[:key] = key_args if key_args.size > 1
+            options[:reduce] = true
+
             if soft_deleting_enabled? && !with_deleted
-              key_args = key_args + [nil] # deleted_at
-              database.view(send(without_deleted_view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :reduce => true))
+              options[:key] = Array.wrap(options[:key]) + [nil] # deleted_at
+              database.view(send(without_deleted_view_name, options))
             else
-              database.view(send(view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :reduce => true))
+              database.view(send(view_name, options))
             end
             
           end
