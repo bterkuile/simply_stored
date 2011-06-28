@@ -26,6 +26,7 @@ class EmbeddedComment
   include SimplyStored::Couch
   property :body
   is_embedded_in :post
+  belongs_to :strict_post
 end
 
 class StrictPost
@@ -34,6 +35,7 @@ class StrictPost
   belongs_to :user
   
   validates_presence_of :user
+  has_many :embedded_comments
 end
 
 class Comment

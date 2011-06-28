@@ -80,6 +80,10 @@ module SimplyStored
             end
 
             define_method :save do |callbacks=true|
+              if !parent_object
+                errors.add(name, 'no_parent')
+                return false
+              end
               if callbacks
                 _run_save_callbacks do
                   parent_object.is_dirty if self.dirty?
@@ -96,9 +100,7 @@ module SimplyStored
               local_options.assert_valid_keys(:force_reload, :with_deleted)
               forced_reload = local_options[:force_reload] || false
               with_deleted = local_options[:with_deleted] || false
-              
-              return instance_variable_get("@#{name}") unless instance_variable_get("@#{name}").nil? or forced_reload
-              instance_variable_set("@#{name}", send("#{name}_id").present? ? Object.const_get(self.class._find_property(name).options[:class_name]).find(send("#{name}_id"), :with_deleted => with_deleted) : nil)
+              return parent_object
             end
           
             define_method "#{name}=" do |value|
@@ -107,22 +109,21 @@ module SimplyStored
 
               if value
                 # Has many object update
-                value_has_many_name = klass.properties.find{|p| p.is_a?(SimplyStored::Couch::HasMany::Property) && p.options[:class_name] == self.class.name}.try(:name)
+                value_has_many_name = klass.properties.find{|p| p.is_a?(SimplyStored::Couch::HasManyEmbedded::Property) && p.options[:class_name] == self.class.name}.try(:name)
                 value.send(value_has_many_name) << self unless !value_has_many_name || value.send(value_has_many_name).include?(self)
 
                 # Has one object update
-                value_has_one_name = klass.properties.find{|p| p.is_a?(SimplyStored::Couch::HasOne::Property) && p.options[:class_name] == self.class.name}.try(:name)
-                value.instance_variable_set("@#{value_has_one_name}", self) unless !value_has_one_name || value.send(value_has_one_name) == self
+                #value_has_one_name = klass.properties.find{|p| p.is_a?(SimplyStored::Couch::HasOneEmbedded::Property) && p.options[:class_name] == self.class.name}.try(:name)
+                #value.instance_variable_set("@#{value_has_one_name}", self) unless !value_has_one_name || value.send(value_has_one_name) == self
               end
 
               # Mark changed if appropriate
-              send("#{name}_will_change!") if value != instance_variable_get("@#{name}")
+              send("#{name}_will_change!") if value != parent_object
 
-              instance_variable_set("@#{name}", value)
+              self.parent_object = value
               if value.nil?
                 send("#{name}_id=", nil)
               else
-                debugger
                 send("#{name}_id=", value.id)
               end
             end
