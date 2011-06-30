@@ -8,6 +8,11 @@ module SimplyStored
 
       def define_has_and_belongs_to_many_property(foreign_key)
         property foreign_key
+
+        # Only allow non nil or empty values to be set
+        define_method "#{foreign_key}=" do |value|
+          super(value.is_a?(Array) ? value.select{|v| v.present?} : value)
+        end
       end
 
       def define_has_and_belongs_to_many_views(name, options)

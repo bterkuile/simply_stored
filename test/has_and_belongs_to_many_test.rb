@@ -37,6 +37,17 @@ class HasAndBelongsToManyTest < Test::Unit::TestCase
         assert_equal 3, network.servers.size
       end
 
+      should "not add empty relations" do
+        # Checkbox assignment often gives an empty one to
+        # set array to [] when none is selected
+        server = Server.new
+        network = Network.create(:klass => "Q")
+        server.network_ids = ["", nil, network.id]
+        assert_equal 1, server.network_ids.size
+        server.save!
+        assert_equal 1, server.networks.size
+      end
+
       should "fetch the associated objects from the other side of the relation" do
         network = Network.create(:klass => "A")
         3.times {
