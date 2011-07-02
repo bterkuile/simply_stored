@@ -50,6 +50,10 @@ class EmbeddingTest < Test::Unit::TestCase
     should "delete comment using integer string" do
 
     end
+
+    should "Count" do
+      assert_equal 2, EmbeddedComment.count
+    end
   end
 
   context "Creation of comment" do
@@ -132,6 +136,14 @@ class EmbeddingTest < Test::Unit::TestCase
       post_reloaded = Post.find(@post.id)
       comment_reloaded = post_reloaded.embedded_comments.first
       assert_equal comment_reloaded.strict_post, @strict_post
+    end
+
+    should "have parent object when queried through relation" do
+      assert @strict_post.save
+      @post.embedded_comments.each{|ec| ec.strict_post = @strict_post; ec.save}
+      strict_post_reloaded = StrictPost.find(@strict_post.id)
+      assert_equal strict_post_reloaded.embedded_comments.first, @post.embedded_comments.first
+      assert_equal strict_post_reloaded.embedded_comments.first.post, @post
     end
   end
 end

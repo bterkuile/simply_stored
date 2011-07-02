@@ -65,7 +65,7 @@ module SimplyStored
           owner_clazz.class_eval do
             property :"#{name}_id"
             attr_accessor :parent_object
-            attr_accessor :index
+            property :index
             @@embedded_in_class_name = name.to_s.camelize
 
             class << self
@@ -88,8 +88,12 @@ module SimplyStored
                   }}|,
                   :reduce => %|fucntion(key, values){return values.length}|,
                   :type => :raw,
-                  :results_filter => lambda{|res| res['rows'].map{|row| row['value']}},
-                  :include_docs => false
+                  :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d}},
+                  :include_docs => true
+              end
+
+              define_method :count do |options = {}|
+                database.view(all_documents_for_count(options.merge(:reduce => true)))['rows'].try(:first).try('[]', 'value').to_i
               end
             end
 
@@ -97,16 +101,20 @@ module SimplyStored
             define_method "==" do |value|
               self.class == value.class && (value.respond_to?(:parent_object) && self.parent_object == value.parent_object) && (value.respond_to?(:index) && self.index == value.index)
             end
-
-            view :all_documents, :type => :raw, :include_docs => true, :map => %{
-              function(doc){
-                if(doc['ruby_class'] == '#{name.to_s.singularize.camelize}' && typeof(doc['#{parent_property_name}']) == 'object'){
-                  for(var i=0; i < doc['#{parent_property_name}'].length; i++){
-                    emit(doc['#{parent_property_name}'][i]['created_at'], doc['#{parent_property_name}'][i]);
-                  }
+            view :all_documents_for_count, :type => :raw, :include_docs => false, :map => %|function(doc){
+              if(doc['ruby_class'] == '#{name.to_s.singularize.camelize}' && typeof(doc['#{parent_property_name}']) == 'object'){
+                for(var i=0; i < doc['#{parent_property_name}'].length; i++){
+                  emit(doc['#{parent_property_name}'][i]['created_at'], 1);
                 }
               }
-            }, :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d}}
+            }|, :reduce => '_sum'
+            view :all_documents, :type => :raw, :include_docs => true, :map => %|function(doc){
+              if(doc['ruby_class'] == '#{name.to_s.singularize.camelize}' && typeof(doc['#{parent_property_name}']) == 'object'){
+                for(var i=0; i < doc['#{parent_property_name}'].length; i++){
+                  emit(doc['#{parent_property_name}'][i]['created_at'], doc['#{parent_property_name}'][i]);
+                }
+              }
+            }|, :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d}}
 
             
 
