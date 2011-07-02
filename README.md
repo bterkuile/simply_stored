@@ -12,6 +12,17 @@ by using an in-memory CouchDB backend.
 
 More examples on how to work with SimplyStored can be found [here](http://github.com/jweiss/simply_stored_examples)
 
+This fork
+============
+This fork of SimplyStored adds some extras to the standard version. A list of this is:
+* Pagination, use: Person.all(:page => params[:pare], :per\_page => 40) out of the box
+* Namespace support, there is working namespace support. It is still in the child phase, but works for me
+* Embedded documents. Embed documents but the orm should just work similar (Speedup choice)
+* Include relations, Advanced relation including, reducing number of queries
+* Multi-database support
+* Rails 3.1, ruby 1.9.2 tested
+* Moving towards ActiveModel, phasing out other libraries
+
 Installation
 ============
 
