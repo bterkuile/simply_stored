@@ -52,6 +52,7 @@ module SimplyStored
       
         def initialize(owner_clazz, name, options = {})
           @name = name
+          embedded_in_name = name
           @options = {
             :class_name => name.to_s.singularize.camelize
           }.update(options)
@@ -64,7 +65,39 @@ module SimplyStored
           owner_clazz.class_eval do
             property :"#{name}_id"
             attr_accessor :parent_object
-            
+            attr_accessor :index
+            @@embedded_in_class_name = name.to_s.camelize
+
+            class << self
+
+              define_method :embedded_in_class_name do
+              #  embedded_in_name.to_s.singularize.camelize
+                @@embedded_in_class_name
+              end
+
+              define_method :belongs_to do |belongs_to_name, *args|
+                super(*([belongs_to_name] + args))
+                # Now override belongs to view
+                view "association_#{foreign_property}_belongs_to_#{belongs_to_name}",
+                  :map => %|function(doc){if(doc['ruby_class'] == '#{embedded_in_class_name}' && doc['#{self.name.property_name.pluralize}']){
+                    for(var i in doc.#{self.name.property_name.pluralize}){
+                      if(doc['#{self.name.property_name.pluralize}'][i]['#{belongs_to_name.to_s.foreign_key}']){
+                        emit([doc['#{self.name.property_name.pluralize}'][i]['#{belongs_to_name.to_s.foreign_key}'], doc['created_at']], doc['#{self.name.property_name.pluralize}'][i]);
+                      }
+                    }
+                  }}|,
+                  :reduce => %|fucntion(key, values){return values.length}|,
+                  :type => :raw,
+                  :results_filter => lambda{|res| res['rows'].map{|row| row['value']}},
+                  :include_docs => false
+              end
+            end
+
+            # Redefine the equality method, since we are different kind of objects
+            define_method "==" do |value|
+              self.class == value.class && (value.respond_to?(:parent_object) && self.parent_object == value.parent_object) && (value.respond_to?(:index) && self.index == value.index)
+            end
+
             view :all_documents, :type => :raw, :include_docs => true, :map => %{
               function(doc){
                 if(doc['ruby_class'] == '#{name.to_s.singularize.camelize}' && typeof(doc['#{parent_property_name}']) == 'object'){
@@ -74,6 +107,8 @@ module SimplyStored
                 }
               }
             }, :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d}}
+
+            
 
             # For now empty merge. Since value of map function is transformed to object
             define_method :merge do |*args|
@@ -110,7 +145,7 @@ module SimplyStored
               if value
                 # Has many object update
                 value_has_many_name = klass.properties.find{|p| p.is_a?(SimplyStored::Couch::HasManyEmbedded::Property) && p.options[:class_name] == self.class.name}.try(:name)
-                value.send(value_has_many_name) << self unless !value_has_many_name || value.send(value_has_many_name).include?(self)
+                value.send("add_#{value_has_many_name.to_s.singularize}", self) unless !value_has_many_name || value.send(value_has_many_name).include?(self)
 
                 # Has one object update
                 #value_has_one_name = klass.properties.find{|p| p.is_a?(SimplyStored::Couch::HasOneEmbedded::Property) && p.options[:class_name] == self.class.name}.try(:name)
@@ -141,7 +176,7 @@ module SimplyStored
         def association?
           true
         end
-      end
+      end # Property
     end
   end
 end

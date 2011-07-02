@@ -13,14 +13,12 @@ class EmbeddingTest < Test::Unit::TestCase
 
     should "return a valid size" do
       assert_equal 2, @post.embedded_comments.size
-      debugger
       post_reloaded = Post.find(@post.id)
       assert_equal 2, post_reloaded.embedded_comments.size
     end
 
     should "delete comment using object" do
       @post.remove_embedded_comment(@post.embedded_comments.first)
-      #debugger
       assert_equal 1, @post.embedded_comments.size
       post_reloaded = Post.find(@post.id)
       assert_equal 1, post_reloaded.embedded_comments.size
@@ -65,14 +63,14 @@ class EmbeddingTest < Test::Unit::TestCase
     should "not save when no parent is present" do
       comment = EmbeddedComment.new :body => 'no parent'
       assert_equal false, comment.save
-      puts comment.errors.full_messages.inspect
+      assert comment.errors[:post].include?('no_parent')
     end
 
     should "save when initialized with parent actual name initialization" do
       comment = EmbeddedComment.new :body => 'no parent', :post => @post
       assert comment.save
-      assert comment.post = @post
-      assert comment.parent_object = @post
+      assert_equal @post, comment.post
+      assert_equal @post, comment.parent_object
       assert @post.embedded_comments.include?(comment)
       reloaded_post = Post.find @post.id
       assert reloaded_post.embedded_comments.include?(comment)
@@ -110,16 +108,30 @@ class EmbeddingTest < Test::Unit::TestCase
 
   context "belongs to stric_post" do
     setup do
-      @strict_post = StrictPost.create
+      recreate_db
+      @user = User.create(:name => 'embedding user')
+      @strict_post = StrictPost.create(:user => @user)
       @post = Post.new
       @post.embedded_comments= [{'ruby_class' => 'EmbeddedComment', 'body' => 'body1'}, {'ruby_class' => 'EmbeddedComment', 'body' => 'body2'}]
       @post.save
     end
 
     should "add embedded comments to strict_post" do
-      @strict_post.embedded_comments = @post.embedded_comments
+      # @strict_post.embedded_comments = @post.embedded_comments I should have my own test
       assert @strict_post.save
+      @post.embedded_comments.each{|ec| ec.strict_post = @strict_post; ec.save}
+      strict_post_reloaded = StrictPost.find(@strict_post.id)
+      assert_equal strict_post_reloaded.embedded_comments.size, @post.embedded_comments.size
     end
 
+    should "have strict_post as association" do
+
+      # @strict_post.embedded_comments = @post.embedded_comments I should have my own test
+      assert @strict_post.save
+      @post.embedded_comments.each{|ec| ec.strict_post = @strict_post; ec.save}
+      post_reloaded = Post.find(@post.id)
+      comment_reloaded = post_reloaded.embedded_comments.first
+      assert_equal comment_reloaded.strict_post, @strict_post
+    end
   end
 end

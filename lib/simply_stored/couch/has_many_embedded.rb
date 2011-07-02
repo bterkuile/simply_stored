@@ -51,6 +51,7 @@ module SimplyStored
           klass = self.class.get_class_from_name(name)
           raise ArgumentError, "expected Array got #{values.class}" unless values.is_a?(Array)
           instance_variable_set("@#{name}", []) unless instance_variable_get("@#{name}")
+          iid = 0
           for value in values
             if value.is_a?(Hash)
               newval = klass.new
@@ -58,9 +59,11 @@ module SimplyStored
               newval.updated_at ||= Time.now
               newval.created_at ||= Time.now
             else
-              newval = nil
+              newval = value
             end
-            instance_variable_get("@#{name}") << (newval || value)
+            newval.index = iid
+            instance_variable_get("@#{name}") << newval
+            iid += 1
           end
           save
         end
@@ -76,9 +79,10 @@ module SimplyStored
             newval.updated_at ||= Time.now
             newval.created_at ||= Time.now
           else
-            newval = nil
+            newval = value
           end
-          instance_variable_get("@#{name}") << (newval || value)
+          newval.index = (instance_variable_get("@#{name}") || []).size
+          instance_variable_get("@#{name}") << newval
           save
         end
       end
@@ -88,14 +92,28 @@ module SimplyStored
           klass = self.class.get_class_from_name(name)
           if value.is_a?(klass)
             found = instance_variable_get("@#{name}").delete(value)
-            is_dirty if found
+            if found
+              self.is_dirty
+              self.send("reset_#{name}_index_values")
+            end
           else
             raise ArgumentError, "expected #{klass} got #{value.class}"
           end
           return save
         end
       end
-      
+
+
+      def define_reset_index_values(name, options)
+        define_method "reset_#{name}_index_values" do
+          i = 0
+          for embedded_document in (instance_variable_get("@#{name}") || [])
+            embedded_document.index = i
+            i += 1 
+          end
+        end
+      end
+
      # Not converted yet 
       def define_has_many_embedded_setter_remove_all(name, options)
         define_method "remove_all_#{name}" do
@@ -158,6 +176,7 @@ module SimplyStored
             define_has_many_embedded_setter_add(name, options)
             define_has_many_embedded_setter_remove(name, options)
             define_has_many_embedded_setter_remove_all(name, options)
+            define_reset_index_values(name, options)
             define_has_many_embedded_count(name, options)
           end
         end
