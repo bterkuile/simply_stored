@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
      "README.md",
      "lib/simply_stored.rb",
      "lib/simply_stored/class_methods_base.rb",
+     "lib/simply_stored/include_relation.rb",
      "lib/simply_stored/couch.rb",
      "lib/simply_stored/couch/association_property.rb",
      "lib/simply_stored/couch/database.rb",

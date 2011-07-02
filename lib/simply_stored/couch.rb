@@ -23,6 +23,7 @@ require 'simply_stored/couch/has_one'
 require 'simply_stored/couch/pagination'
 require 'simply_stored/couch/ext/couch_potato'
 require 'simply_stored/couch/views'
+require 'simply_stored/include_relation'
 
 module SimplyStored
   module Couch
