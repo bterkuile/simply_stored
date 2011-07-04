@@ -88,7 +88,7 @@ module SimplyStored
                   }}|,
                   :reduce => %|fucntion(key, values){return values.length}|,
                   :type => :raw,
-                  :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d}},
+                  :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d.parent_object.send(self.name.property_name.pluralize)[d.index]}},
                   :include_docs => true
               end
 
@@ -114,7 +114,7 @@ module SimplyStored
                   emit(doc['#{parent_property_name}'][i]['created_at'], doc['#{parent_property_name}'][i]);
                 }
               }
-            }|, :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d}}
+            }|, :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d.parent_object.send(parent_property_name)[d.index]}}
 
             
 

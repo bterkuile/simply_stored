@@ -44,6 +44,26 @@ class EmbeddingTest < Test::Unit::TestCase
       assert_equal 'body-changed', comment_reloaded.body
     end
 
+    should "change attribute when not loaded through parent object" do
+      embedded_comments = EmbeddedComment.all
+      embedded_comment = embedded_comments.first
+      embedded_comment.body = 'newbody'
+      embedded_comment.save
+      embedded_comments_reloaded = EmbeddedComment.all
+      assert embedded_comments_reloaded.map(&:body).include?('newbody')
+    end
+
+    should "change attribute when not loaded through parent object" do
+      # Same as above, but now save through parent object
+      embedded_comments = EmbeddedComment.all
+      embedded_comment = embedded_comments.first
+      embedded_comment.body = 'newbody'
+      embedded_comment.parent_object.is_dirty
+      embedded_comment.parent_object.save
+      embedded_comments_reloaded = EmbeddedComment.all
+      assert embedded_comments_reloaded.map(&:body).include?('newbody')
+    end
+
     should "delete comment using integer" do
 
     end
@@ -144,6 +164,14 @@ class EmbeddingTest < Test::Unit::TestCase
       strict_post_reloaded = StrictPost.find(@strict_post.id)
       assert_equal strict_post_reloaded.embedded_comments.first, @post.embedded_comments.first
       assert_equal strict_post_reloaded.embedded_comments.first.post, @post
+    end
+
+    should "have actual object same as in parent object" do
+      assert @strict_post.save
+      @post.embedded_comments.each{|ec| ec.strict_post = @strict_post; ec.save}
+      strict_post_reloaded = StrictPost.find(@strict_post.id)
+      embedded_comment = strict_post_reloaded.embedded_comments.first
+      assert embedded_comment.parent_object.embedded_comments.map(&:object_id).include?(embedded_comment.object_id)
     end
   end
 end
