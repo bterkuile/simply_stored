@@ -12,6 +12,7 @@ require 'simply_stored/couch/validations'
 require 'simply_stored/couch/pagination_options'
 require 'simply_stored/couch/association_property'
 require 'simply_stored/couch/properties'
+require 'simply_stored/couch/ancestry'
 require 'simply_stored/couch/finders'
 require 'simply_stored/couch/find_by'
 require 'simply_stored/couch/belongs_to'
@@ -57,6 +58,7 @@ module SimplyStored
       include SimplyStored::Couch::Pagination
       include SimplyStored::Couch::PaginationOptions
       include SimplyStored::Storage::ClassMethods
+      include SimplyStored::Couch::Ancestry
       
       def create(attributes = {}, &blk)
         instance = new(attributes, &blk)

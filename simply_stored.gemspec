@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
      "lib/simply_stored/couch.rb",
      "lib/simply_stored/couch/association_property.rb",
      "lib/simply_stored/couch/database.rb",
+     "lib/simply_stored/couch/ancestry.rb",
      "lib/simply_stored/couch/belongs_to.rb",
      "lib/simply_stored/couch/embedded_in.rb",
      "lib/simply_stored/couch/ext/couch_potato.rb",

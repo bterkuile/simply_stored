@@ -29,6 +29,14 @@ class EmbeddedComment
   belongs_to :strict_post
 end
 
+class Directory
+  include SimplyStored::Couch
+
+  property :name
+
+  has_ancestry
+end
+
 class StrictPost
   include SimplyStored::Couch
   
