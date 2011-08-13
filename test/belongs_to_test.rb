@@ -110,7 +110,7 @@ class BelongsToTest < Test::Unit::TestCase
       
       should 'set cache in setter' do
         post = Post.create
-        user = User.create
+        user = User.create :title => 'Mr.'
         assert_nil post.instance_variable_get("@user")
         post.user = user
         assert_equal user, post.instance_variable_get("@user")

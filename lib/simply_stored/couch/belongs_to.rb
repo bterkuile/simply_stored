@@ -103,7 +103,7 @@ module SimplyStored
             define_method "#{name}_id=" do |new_foreign_id|
               super(new_foreign_id)
               value = instance_variable_get("@#{name}")
-              remove_instance_variable("@#{name}") if instance_variable_defined?("@#{name}")
+              remove_instance_variable("@#{name}") if instance_variable_defined?("@#{name}") && new_foreign_id != value.try(:id)
             end
           end
         end

@@ -102,9 +102,10 @@ class EmbeddingTest < Test::Unit::TestCase
     should "save when initialized with parent object initialization" do
       comment = EmbeddedComment.new :body => 'no parent', :parent_object => @post
       assert comment.save
-      assert comment.post = @post
-      assert comment.parent_object = @post
+      assert_equal comment.post, @post
+      assert_equal comment.parent_object, @post
       assert @post.embedded_comments.include?(comment)
+      assert comment.save
       reloaded_post = Post.find @post.id
       assert reloaded_post.embedded_comments.include?(comment)
     end
@@ -112,8 +113,8 @@ class EmbeddingTest < Test::Unit::TestCase
       comment = EmbeddedComment.new :body => 'no parent'
       comment.post = @post
       assert comment.save
-      assert comment.post = @post
-      assert comment.parent_object = @post
+      assert_equal comment.post, @post
+      assert_equal comment.parent_object, @post
       assert @post.embedded_comments.include?(comment)
       reloaded_post = Post.find @post.id
       assert reloaded_post.embedded_comments.include?(comment)
@@ -122,8 +123,8 @@ class EmbeddingTest < Test::Unit::TestCase
       comment = EmbeddedComment.new :body => 'no parent'
       comment.parent_object = @post
       assert comment.save
-      assert comment.post = @post
-      assert comment.parent_object = @post
+      assert_equal comment.post, @post
+      assert_equal comment.parent_object, @post
       assert @post.embedded_comments.include?(comment)
       reloaded_post = Post.find @post.id
       assert reloaded_post.embedded_comments.include?(comment)
