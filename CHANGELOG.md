@@ -1,6 +1,47 @@
 Changelog
 =============
 
+0.6.8
+
+- Lax restriction on ActiveSupport version
+
+0.6.7
+
+- Rebuild with Ruby 1.8
+
+0.6.6
+
+- Bump supported CouchPotato version
+
+0.6.5
+
+- Retry on connection refused errors, useful when CouchDB takes a break in excessive test runs that teardown/re-create many databases
+
+0.6.4
+
+- Restore Ruby 1.9.2 compatibility
+
+0.6.3
+
+- Compatible with CouchPotato 0.5.6
+
+0.6.2
+
+- Decorate conflict exceptions with information about the conflict
+
+0.6.1
+
+- Fix warning of dynamically created views to point to the correct called
+
+0.6.0
+
+- Ruby 1.9.2 compatible
+
+- compatible with CouchPotato > 0.5 where the attributes are lazy loaded
+
+- Depends on ActiveSupport/ActiveModel 3.x
+  --> Does not longer work with Rails 2.x !
+
 0.5.4
 
 - Add Rake task to compact all views in a given database: 

@@ -16,7 +16,9 @@ module SimplyStored
 
     def save(validate = true)
       result = retry_on_conflict do
-        self.class.database.save_document(self, validate)
+        retry_on_connection_error do
+          self.class.database.save_document(self, validate)
+        end
       end
       # ActiveModel implementations
       @previously_changed = changes
@@ -26,7 +28,9 @@ module SimplyStored
 
     def save!
       result = retry_on_conflict do
-        self.class.database.save_document!(self)
+        retry_on_connection_error do
+          self.class.database.save_document!(self)
+        end
       end
       # ActiveModel implementations
       @previously_changed = changes
@@ -37,12 +41,18 @@ module SimplyStored
     def destroy(override_soft_delete=false)
       check_and_destroy_dependents
       if self.class.soft_deleting_enabled? && !override_soft_delete
+        # soft-delete
         _mark_as_deleted
       else
-        self.skip_callbacks = true if self.class.soft_deleting_enabled? && deleted?
-        self.class.database.destroy_document(self)
+        if self.class.soft_deleting_enabled? && deleted?
+          # really deleting a previously soft-deleted object - skipping callbacks
+          CouchPotato.database.destroy_document(self, false)
+        else # deleting a normal object or a soft-deletable object that was not soft-deleted before
+          CouchPotato.database.destroy_document(self, true)
+        end
         freeze
       end
+      self
     end
     alias :delete :destroy
 
@@ -73,15 +83,15 @@ module SimplyStored
         false
       end
     end
-    
-    protected
-    
-    def retry_on_conflict(max_retries = 2, &blk)
+
+  protected
+
+    def retry_on_connection_error(max_retries = 2, &blk)
       retry_count = 0
       begin
         blk.call
-      rescue RestClient::Exception, RestClient::Conflict => e
-        if (e.http_code == 409 || e.is_a?(RestClient::Conflict)) && self.class.auto_conflict_resolution_on_save && retry_count < max_retries && try_to_merge_conflict
+      rescue Errno::ECONNREFUSED => e
+        if retry_count < max_retries
           retry_count += 1
           retry
         else
@@ -89,24 +99,61 @@ module SimplyStored
         end
       end
     end
-    
+
+    def retry_on_conflict(max_retries = 2, &blk)
+      retry_count = 0
+      begin
+        _reset_conflict_information
+        blk.call
+      rescue RestClient::Exception, RestClient::Conflict => e
+        if (e.http_code == 409 || e.is_a?(RestClient::Conflict)) && self.class.auto_conflict_resolution_on_save && retry_count < max_retries && try_to_merge_conflict
+          retry_count += 1
+          retry
+        else
+          _decorate_with_conflict_details(e) if e.is_a?(RestClient::Conflict)
+          raise e
+        end
+      end
+    end
+
+    def _decorate_with_conflict_details(exception)
+      if @_conflict_information.present?
+        def exception.metaclass
+          class << self
+            self
+          end
+        end
+        local_conflict_information = @_conflict_information
+        exception.metaclass.send(:define_method, :message){ "409 Conflict - conflict on attributes: #{local_conflict_information.inspect}" }
+      end
+    end
+
     def try_to_merge_conflict
       original = self.class.find(id)
       our_attributes = self.attributes.dup
       their_attributes = original.attributes.dup
-      [:updated_at, :created_at, :id, :rev, :_id, :_rev].each do |skipped_attribute|
-        our_attributes.delete(skipped_attribute)
-        their_attributes.delete(skipped_attribute)
-      end
+      _clear_non_relevant_attributes(our_attributes)
+      _clear_non_relevant_attributes(their_attributes)
       if _merge_possible?(our_attributes, their_attributes)
         _copy_non_conflicting_attributes(our_attributes, their_attributes)
         self._rev = original._rev
         true
       else
+        @_conflict_information = _conflicting_attributes(our_attributes, their_attributes)
         false
       end
     end
-    
+
+    def _reset_conflict_information
+      @_conflict_information = nil
+    end
+
+    def _clear_non_relevant_attributes(attr_list)
+      [:updated_at, :created_at, :id, :rev, :_id, :_rev].each do |skipped_attribute|
+        attr_list.delete(skipped_attribute)
+      end
+    end
+
     def _copy_non_conflicting_attributes(our_attributes, their_attributes)
       their_attributes.each do |attr_name, their_value|
         if !self.send("#{attr_name}_changed?") && our_attributes[attr_name] != their_value
@@ -116,13 +163,21 @@ module SimplyStored
     end
     
     def _merge_possible?(our_attributes, their_attributes)
-      their_attributes.all? do |attr_name, their_value|
-        our_attributes[attr_name] == their_value || # same
-        !self.send("#{attr_name}_changed?") || # we didn't change
-        self.send("#{attr_name}_changed?") && their_value == self.send("#{attr_name}_was") # we changed and they kept the original
+      _conflicting_attributes(our_attributes, their_attributes).empty?
+    end
+
+    def _conflicting_attributes(our_attributes, their_attributes)
+      their_attributes.keys.delete_if do |attr_name|
+        _attribute_not_in_conflict?(attr_name, our_attributes[attr_name], their_attributes[attr_name])
       end
     end
-    
+
+    def _attribute_not_in_conflict?(attr_name, our_value, their_value)
+      our_value == their_value || # same
+      !self.send("#{attr_name}_changed?") || # we didn't change
+      self.send("#{attr_name}_changed?") && their_value == self.send("#{attr_name}_was") # we changed and they kept the original
+    end
+
     def reset_association_caches
       self.class.properties.each do |property|
         if property.respond_to?(:association?) && property.association?

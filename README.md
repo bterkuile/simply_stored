@@ -28,6 +28,47 @@ Installation
 
     gem install simply_stored
 
+
+#### Using with Rails
+
+Create a config/couchdb.yml:
+
+    default: &default
+      validation_framework: :active_model # optional
+      split_design_documents_per_view: true # optional
+
+    development:
+      <<: *default
+      database: http://localhost:5984/development_db
+    test:
+      <<: *default
+      database: http://localhost:5984/test_db
+    production:
+      <<: *default
+      database: <%= ENV['DB_NAME'] %>
+
+#### Rails 2.x
+
+In config/environment.rb:
+
+    config.gem 'simply_stored', :source => 'http://gemcutter.org'
+    config.frameworks -= [:active_record] # if you do not need ActiveRecord any more
+
+Please note that if you use Rails 2.x, you can only use SimplyStored until version 0.5.4. SimplyStored 0.6 and above require Rails 3.x.
+
+#### Rails 3.x
+
+Add to your Gemfile:
+
+    # gem 'rails' # we don't want to load activerecord so we can't require rails
+    gem 'railties'
+    gem 'actionpack'
+    gem 'actionmailer'
+    gem 'activemodel'
+    gem 'simply_stored', :require => 'simply_stored/couch'
+
+Please also see the installation info of [CouchPotato](https://github.com/langalex/couch_potato)
+
 Usage
 =============
 
@@ -184,33 +225,7 @@ Custom Associations
 Validations
 =============
 
-Further, you can have validations (using the validatable gem)
-
-    class Project
-      include SimplyStored::Couch
-    
-      property :title
-      property :budget
-      property :deadline, :type => Time
-      property :priority
-      
-      validates_presence_of :budget
-      validates_uniqueness_of :priority
-      validates_format_of :title, :with => /\A[a-z0-9\-']+\Z/, :allow_blank => true
-      validates_inclusion_of :priority, :in => [0,1,2,3,4,5]
-      
-    end
-    
-    project = Project.new
-    project.save
-    # => false
-    
-    project.errors
-    # => #<Validatable::Errors:0x102592740 @errors={:budget=>["can't be empty"], :priority=>["must be one or more of 0, 1, 2, 3, 4, 5"]}
-    
-    project.save!
-    # => raises CouchPotato::Database::ValidationsFailedError: #<CouchPotato::Database::ValidationsFailedError:0x102571130>
-    
+Validations are handled by ActiveModel 
 
 S3 Attachments
 =============

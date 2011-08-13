@@ -33,7 +33,6 @@ begin
     s.add_dependency('rest-client', '>= 1.4.2')
     s.add_dependency('couch_potato', '>= 0.2.15')
     s.add_dependency('activesupport')
-    s.add_dependency('mattmatt-validatable')
     s.version = source_version
   end
   Jeweler::GemcutterTasks.new
