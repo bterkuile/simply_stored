@@ -72,7 +72,15 @@ module SimplyStored
               with_deleted = local_options[:with_deleted] || false
               
               return instance_variable_get("@#{name}") unless instance_variable_get("@#{name}").nil? or forced_reload
-              instance_variable_set("@#{name}", send("#{name}_id").present? ? self.class._find_property(name).options[:class_name].constantize.find(send("#{name}_id"), :with_deleted => with_deleted) : nil)
+
+              if send("#{name}_id").present?
+                # Try to fetch the object. Does not have to be present. When relation dependency is ignore, the id remains.
+                # This will result in a id to a non existent object. Therefore the rescue for object
+                object = self.class._find_property(name).options[:class_name].constantize.find(send("#{name}_id"), :with_deleted => with_deleted) rescue nil
+                instance_variable_set("@#{name}",  object)
+              else
+                instance_variable_set("@#{name}",  nil)
+              end
             end
           
             define_method "#{name}=" do |value|
