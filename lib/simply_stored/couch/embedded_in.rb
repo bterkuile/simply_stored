@@ -97,6 +97,12 @@ module SimplyStored
               end
             end
 
+            # Make parent object send through original for callbacks
+            define_method :parent_object= do |value|
+              return @parent_object if @parent_object && @parent_object == value
+              @parent_object = value # Prevent circular calls
+              send("#{name}=", value)
+            end
             # Redefine the equality method, since we are different kind of objects
             define_method "==" do |value|
               self.class == value.class && (value.respond_to?(:parent_object) && self.parent_object == value.parent_object) && (value.respond_to?(:index) && self.index == value.index)
@@ -147,6 +153,7 @@ module SimplyStored
             end
           
             define_method "#{name}=" do |value|
+              return value if instance_variable_get("@#{name}") == value
               klass = self.class.get_class_from_name(self.class._find_property(name).options[:class_name])
               raise ArgumentError, "expected #{klass} got #{value.class}" unless value.nil? || value.is_a?(klass)
 
@@ -163,7 +170,7 @@ module SimplyStored
               # Mark changed if appropriate
               send("#{name}_will_change!") if value != parent_object
 
-              self.parent_object = value
+              instance_variable_set('@parent_object', value)
               if value.nil?
                 send("#{name}_id=", nil)
               else
