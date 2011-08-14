@@ -47,6 +47,7 @@ class PaginationTest < Test::Unit::TestCase
       assert_equal 2, result.per_page
       assert_equal ['user2', 'user3'], result.map(&:title).sort
       assert_equal 6, result.total_entries
+      assert_equal 6, result.total_count
       assert_equal 3, result.num_pages
     end
   end

@@ -33,6 +33,8 @@ module SimplyStored
             def total_entries
               #{total_entries || 'total_rows'}
             end
+            alias total_count total_entries
+
             def #{current_page_method}
               #{page}
             end
