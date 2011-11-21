@@ -22,7 +22,7 @@ module SimplyStored
             end
           end
 
-          self.class.set_parents(self, @children)
+          self.class.set_parent(self, @children)
           @descendants = nil # reload descendants if requested
 
           # Return wether all children can be saved :)
@@ -236,16 +236,16 @@ module SimplyStored
 
           # Set the parents of all objects from 'cached' results
           for root in res.children.sort_by!(&:position)
-            set_parents(root, root.children)
+            set_parent(root, root.children)
           end
           res.children
         end
 
         # Recursive set parents
-        def set_parents(parent, children)
+        def set_parent(parent, children)
           for child in children.sort_by!(&:position)
             child.parent = parent
-            set_parents child, child.children 
+            set_parent child, child.children 
           end
         end
       end
