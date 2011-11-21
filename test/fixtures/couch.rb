@@ -37,6 +37,15 @@ class Directory
   has_ancestry
 end
 
+class NamespacedDirectory
+  include SimplyStored::Couch
+
+  property :name
+  property :locale
+
+  has_ancestry :by_property => :locale
+end
+
 class StrictPost
   include SimplyStored::Couch
   
