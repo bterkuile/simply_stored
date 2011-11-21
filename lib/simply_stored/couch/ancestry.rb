@@ -114,11 +114,11 @@ module SimplyStored
           (self.class.database.couchrest_database.bulk_load(parent_ids)['rows'] || []).map{|h| h['doc']}.compact
         end
 
-        def path
+        def tree_path
           ancestors + [self]
         end
 
-        def depth
+        def tree_depth
           (path_ids || [nil]).size - 1
         end
       end
