@@ -220,7 +220,7 @@ module SimplyStored
             for child_id in page.path_ids
               child = current.children.find{|p| p.id == child_id}
               unless child
-                child = new(:id => child_id)
+                child = pages.find{|p| p.id == child_id} || new(:id => child_id)
                 current.children << child
               end
               current = child

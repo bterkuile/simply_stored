@@ -153,5 +153,10 @@ class AncestryTest < Test::Unit::TestCase
       assert_equal [@d1.id], full_tree.map(&:id)
       assert_equal [[@d2.id, @d3.id].sort], full_tree.map{|p| p.children.map(&:id).sort}
     end
+    should "give a proper tree with revisions" do
+      @d1.children = [@d2, @d3, @d4]
+      full_tree = NamespacedDirectory.full_tree(:locale => 'en')
+      assert_equal [@d1], full_tree
+    end
   end
 end
