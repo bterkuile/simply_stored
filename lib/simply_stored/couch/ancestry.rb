@@ -179,7 +179,9 @@ module SimplyStored
       module ClassMethods
         def roots(options = {})
           if root_property = ancestry_by_property
-            if options.is_a?(Symbol)
+            if options.empty?
+              options = {}
+            elsif options.is_a?(Symbol)
               options = {:startkey => [options.to_s], :endkey => [options.to_s, {}]}
             elsif options.is_a?(String)
               options = {:startkey => [options], :endkey => [options, {}]}
@@ -195,7 +197,9 @@ module SimplyStored
 
         def full_tree(options = {})
           if root_property = ancestry_by_property
-            if options.is_a?(Array)
+            if !options
+              records = all
+            elsif options.is_a?(Array)
               records = options
             elsif options.is_a?(Symbol) || options.is_a?(String)
               records = send("find_all_by_#{root_property}", options.to_s)
@@ -206,7 +210,7 @@ module SimplyStored
               records = options[:records].presence || all
             end 
           else
-            records = options.is_a?(Array) ? options : options[:records].presence || all
+            records = options.is_a?(Array) ? options : (options && options[:records].presence) || all
           end
           build_tree(records) #.first.children
         end
