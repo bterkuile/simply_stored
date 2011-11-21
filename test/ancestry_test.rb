@@ -128,5 +128,30 @@ class AncestryTest < Test::Unit::TestCase
       d3_reloaded = NamespacedDirectory.find(@d3.id)
       assert_equal @d4.locale, d3_reloaded.locale
     end
+
+    should "give a proper tree without namespace" do
+      @d1.children = [@d2, @d3]
+      full_tree = NamespacedDirectory.full_tree
+      assert_equal [@d1.id, @d4.id].sort, full_tree.map(&:id).sort
+      assert_equal [[@d2.id, @d3.id].sort, []].sort, full_tree.sort_by(&:id).map{|p| p.children.map(&:id).sort}.sort
+    end
+    should "give a proper tree with namespace as symbol" do
+      @d1.children = [@d2, @d3]
+      full_tree = NamespacedDirectory.full_tree(:en)
+      assert_equal [@d1.id], full_tree.map(&:id)
+      assert_equal [[@d2.id, @d3.id].sort], full_tree.map{|p| p.children.map(&:id).sort}
+    end
+    should "give a proper tree with namespace as string" do
+      @d1.children = [@d2, @d3]
+      full_tree = NamespacedDirectory.full_tree('en')
+      assert_equal [@d1.id], full_tree.map(&:id)
+      assert_equal [[@d2.id, @d3.id].sort], full_tree.map{|p| p.children.map(&:id).sort}
+    end
+    should "give a proper tree with namespace as property" do
+      @d1.children = [@d2, @d3]
+      full_tree = NamespacedDirectory.full_tree(:locale => 'en')
+      assert_equal [@d1.id], full_tree.map(&:id)
+      assert_equal [[@d2.id, @d3.id].sort], full_tree.map{|p| p.children.map(&:id).sort}
+    end
   end
 end

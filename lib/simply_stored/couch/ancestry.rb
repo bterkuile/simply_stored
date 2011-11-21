@@ -185,16 +185,30 @@ module SimplyStored
               options = {:startkey => [options], :endkey => [options, {}]}
             elsif options.keys.include?(root_property)
               root_key = options.delete(root_property)
-              options[:startkey] = [root_key]
-              options[:endkey] = [root_key, {}]
+              options[:startkey] = [root_key.to_s]
+              options[:endkey] = [root_key.to_s, {}]
             end 
           end
           options[:reduce] = false
           database.view(roots_view(options))
         end
 
-        def full_tree(instances = all)
-          build_tree(instances) #.first.children
+        def full_tree(options = {})
+          if root_property = ancestry_by_property
+            if options.is_a?(Array)
+              records = options
+            elsif options.is_a?(Symbol) || options.is_a?(String)
+              records = send("find_all_by_#{root_property}", options.to_s)
+            elsif options.keys.include?(root_property)
+              root_key = options.delete(root_property)
+              records = send("find_all_by_#{root_property}", root_key.to_s)
+            else
+              records = options[:records].presence || all
+            end 
+          else
+            records = options.is_a?(Array) ? options : options[:records].presence || all
+          end
+          build_tree(records) #.first.children
         end
 
         # Build a tree from a flat set of pages making use of the path attribute
