@@ -80,7 +80,7 @@ module SimplyStored
 
         def parent
           return @parent if @parent
-          return @parent = self.class.find(parent_id) if parent_id
+          return @parent = self.class.find(parent_id) if parent_id.present?
           nil
         end
 
@@ -94,9 +94,9 @@ module SimplyStored
         end
 
         def parent_id=(val)
-          if @parent_id != val
+          if @parent_id != val.presence
             @parent = nil
-            @parent_id = val
+            @parent_id = val.presence
             update_tree_path
           end
         end
