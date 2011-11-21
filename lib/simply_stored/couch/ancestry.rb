@@ -111,6 +111,7 @@ module SimplyStored
 
         def ancestors
           return [] unless parent_ids.any?
+          return [parent] if parent_ids.size == 1 # optimization, parent is pre-loaded many times
           (self.class.database.couchrest_database.bulk_load(parent_ids)['rows'] || []).map{|h| h['doc']}.compact
         end
 

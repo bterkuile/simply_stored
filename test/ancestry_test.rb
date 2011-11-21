@@ -47,6 +47,17 @@ class AncestryTest < Test::Unit::TestCase
       @d1.children = [@d2, @d3]
       assert_equal [@d1.id, @d4.id].sort, Directory.roots.map(&:id).sort
     end
+
+    should "give proper ancestors" do
+      @d1.children = [@d2, @d3]
+      @d3.add_child(@d4).save
+      assert_equal [], @d1.ancestors
+      assert_equal [@d1], @d2.ancestors
+      assert_equal [@d1], @d3.ancestors
+      assert_equal [@d1, @d3], @d4.ancestors
+      d4_reloaded = Directory.find(@d4.id)
+      assert_equal [@d1, @d3], d4_reloaded.ancestors
+    end
   end
   context "namespaced with hierarchy" do
     setup do
