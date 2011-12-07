@@ -18,16 +18,16 @@ This fork of SimplyStored adds some extras to the standard version. A list of th
 * Pagination, use: Person.all(:page => params[:pare], :per\_page => 40) out of the box
 * Namespace support, there is working namespace support. It is still in the child phase, but works for me
 * Embedded documents. Embed documents but the orm should just work similar (Speedup choice)
-* Include relations, Advanced relation including, reducing number of queries
+* Include relations, Advanced relation including, reducing number of queries (Huge speedup for relations)
+* Ancestry for tree structures
 * Multi-database support
 * Rails 3.1, ruby 1.9.2 tested
-* Moving towards ActiveModel, phasing out other libraries
+* Moving towards ActiveModel, phasing out other/older libraries
 
 Installation
 ============
-
-    gem install simply_stored
-
+Add the following to your bundle file
+    gem 'simply_stored', :git => 'git://github.com/bterkuile/simply_stored.git' 
 
 #### Using with Rails
 
@@ -47,16 +47,7 @@ Create a config/couchdb.yml:
       <<: *default
       database: <%= ENV['DB_NAME'] %>
 
-#### Rails 2.x
-
-In config/environment.rb:
-
-    config.gem 'simply_stored', :source => 'http://gemcutter.org'
-    config.frameworks -= [:active_record] # if you do not need ActiveRecord any more
-
-Please note that if you use Rails 2.x, you can only use SimplyStored until version 0.5.4. SimplyStored 0.6 and above require Rails 3.x.
-
-#### Rails 3.x
+#### Rails 3.1.x
 
 Add to your Gemfile:
 

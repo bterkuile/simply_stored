@@ -244,6 +244,11 @@ class InstanceLifecycleTest < Test::Unit::TestCase
         user.reload
         assert_equal user._rev, user2._rev
       end
+
+      should "update the attachments information" do
+        #TODO: implement
+        assert false
+      end
     end
   end
 end
