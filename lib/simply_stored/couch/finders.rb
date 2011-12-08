@@ -30,7 +30,7 @@ module SimplyStored
           end
         else          
           raise SimplyStored::Error, "Can't load record without an id" if what.nil?
-          document = database.load_document(what)
+          document = database.load_document(what, options)
           if document.nil? or !document.is_a?(self) or (document.deleted? && !with_deleted)
             raise(SimplyStored::RecordNotFound, "#{self.name} could not be found with #{what.inspect}")
           end
