@@ -2,7 +2,9 @@ module SimplyStored
   module ClassMethods
     module Base
       def get_class_from_name(klass_name)
-        klass_name.to_s.gsub('__','/').classify.constantize
+        base = klass_name.to_s.gsub('__','/')
+        base = base.classify unless base[0,1] =~ /[A-Z]/
+        base.constantize
       end
       
       def foreign_key
@@ -30,6 +32,11 @@ module SimplyStored
       # Namespace aware method of creating proper class names    
       def find_association_class_name(association_name)
         (name.split('::')[0..-2] + [association_name.to_s.singularize.camelize]).join('::')
+      end
+
+      # More compatibility with active record plugins
+      def primary_key
+        'id'
       end
 
       # Get documents by ids and bulk update attributes
