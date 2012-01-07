@@ -60,8 +60,10 @@ module SimplyStored
         define_method("add_#{name.to_s.singularize}") do |value|
           klass = self.class.get_class_from_name(name)
           raise ArgumentError, "expected #{klass} got #{value.class}" unless value.is_a?(klass)
-          
-          value.send("#{self.class.foreign_key}=", id)
+          foreign_key = "#{self.class.foreign_key}="
+          # If foreign key is namespace: admin__user, try jus user if admin_user_id is not present
+          foreign_key.gsub!(/.*__/, '') if !value.respond_to?(foreign_key) && value.respond_to?(foreign_key.sub(/.*__/, ''))
+          value.send(foreign_key, id)
           value.save(false)
           
           cached_results = send("_get_cached_#{name}")[:all]
@@ -81,7 +83,10 @@ module SimplyStored
           elsif options[:dependent] == :ignore
             # skip
           else # nullify
-            value.send("#{self.class.foreign_key}=", nil)
+            foreign_key = "#{self.class.foreign_key}="
+            # If foreign key is namespace: admin__user, try jus user if admin_user_id is not present
+            foreign_key.gsub!(/.*__/, '') if !value.respond_to?(foreign_key) && value.respond_to?(foreign_key.sub(/.*__/, ''))
+            value.send(foreign_key, nil)
             value.save(false)
           end
           
