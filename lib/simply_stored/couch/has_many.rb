@@ -46,12 +46,7 @@ module SimplyStored
             # there is probably a faster way to query this
             through_property = self.class.properties.find{|p| p.name == through}
             if through_property && through_property.respond_to?(:options) && through_property.options[:class_name].present?
-              tfp = through_property.options[:class_name].constantize.properties.find{|p| p.name == name}
-              if tfp && tfp.respond_to?(:options) && tfp.options[:class_name].present?
-                through_finder = tfp.options[:class_name].constantize.foreign_property
-              else
-                through_finder = through # try with the association name
-              end
+              through_finder = through_property.options[:class_name].constantize.foreign_property
             else
               through_finder = through # try with the association name
             end
