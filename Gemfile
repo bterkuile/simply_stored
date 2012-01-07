@@ -3,7 +3,7 @@ gem "uuidtools"
 gem "activemodel"
 gem 'rest-client', :require => 'restclient' #, '1.6.1', :require => 'restclient'
 gem 'couchrest'#, '1.0.1'
-gem 'couch_potato'#, '0.2.31.2'
+gem 'couch_potato', :git => 'git://github.com/bterkuile/couch_potato.git' #, '0.2.31.2'
 gem 'shoulda'
 gem 'shoulda-addons'
 gem 'mocha'

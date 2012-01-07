@@ -8,7 +8,7 @@ module SimplyStored
       
       def define_has_one_setter(name, options)
         define_method("#{name}=") do |value|
-          klass = self.class.get_class_from_name(self.class._find_property(name).options[:class_name])
+          klass = self.class.get_class_from_name(name)
           raise ArgumentError, "expected #{klass} got #{value.class}" unless value.nil? || value.is_a?(klass)
           old_value = send("#{name}", :force_reload => true)
           if value.nil?

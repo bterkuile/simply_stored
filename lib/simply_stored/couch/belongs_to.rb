@@ -76,7 +76,7 @@ module SimplyStored
               if send("#{name}_id").present?
                 # Try to fetch the object. Does not have to be present. When relation dependency is ignore, the id remains.
                 # This will result in a id to a non existent object. Therefore the rescue for object
-                object = self.class._find_property(name).options[:class_name].constantize.find(send("#{name}_id"), :with_deleted => with_deleted) rescue nil
+                object = self.class.get_class_from_name(name).find(send("#{name}_id"), :with_deleted => with_deleted) rescue nil
                 instance_variable_set("@#{name}",  object)
               else
                 instance_variable_set("@#{name}",  nil)
@@ -84,7 +84,6 @@ module SimplyStored
             end
           
             define_method "#{name}=" do |value|
-              #klass = self.class.get_class_from_name(self.class._find_property(name).options[:class_name])
               klass = self.class.get_class_from_name(name)
               raise ArgumentError, "expected #{klass} got #{value.class}" unless value.nil? || value.is_a?(klass)
 
