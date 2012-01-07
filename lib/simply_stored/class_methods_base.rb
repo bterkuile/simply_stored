@@ -2,9 +2,14 @@ module SimplyStored
   module ClassMethods
     module Base
       def get_class_from_name(klass_name)
-        base = klass_name.to_s.gsub('__','/')
-        base = base.classify unless base[0,1] =~ /[A-Z]/
-        base.constantize
+        # Try to find class from property definition
+        if property = _find_property(klass_name) and property.respond_to?(:options) and property.options[:class_name].present?
+          property.options[:class_name].constantize
+        else # Fall back to name guessing
+          base = klass_name.to_s.gsub('__','/')
+          base = base.classify unless base[0,1] =~ /[A-Z]/
+          base.constantize
+        end
       end
       
       def foreign_key

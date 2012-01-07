@@ -84,7 +84,8 @@ module SimplyStored
             end
           
             define_method "#{name}=" do |value|
-              klass = self.class.get_class_from_name(self.class._find_property(name).options[:class_name])
+              #klass = self.class.get_class_from_name(self.class._find_property(name).options[:class_name])
+              klass = self.class.get_class_from_name(name)
               raise ArgumentError, "expected #{klass} got #{value.class}" unless value.nil? || value.is_a?(klass)
 
               if value
