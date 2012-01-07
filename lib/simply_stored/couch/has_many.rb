@@ -44,7 +44,18 @@ module SimplyStored
           if forced_reload || cached_results[cache_key].nil?
             
             # there is probably a faster way to query this
-            intermediate_objects = find_associated(through, self.class, :with_deleted => with_deleted, :limit => limit, :foreign_key => options[:foreign_key])
+            through_property = self.class.properties.find{|p| p.name == through}
+            if through_property && through_property.respond_to?(:options) && through_property.options[:class_name].present?
+              tfp = through_property.options[:class_name].constantize.properties.find{|p| p.name == name}
+              if tfp && tfp.respond_to?(:options) && tfp.options[:class_name].present?
+                through_finder = tfp.options[:class_name].constantize.foreign_property
+              else
+                through_finder = through # try with the association name
+              end
+            else
+              through_finder = through # try with the association name
+            end
+            intermediate_objects = find_associated(through_finder, self.class, :with_deleted => with_deleted, :limit => limit, :foreign_key => options[:foreign_key])
             
             through_objects = intermediate_objects.map do |intermediate_object|
               intermediate_object.send(name.to_s.singularize.underscore.gsub('/', '__'), :with_deleted => with_deleted)
