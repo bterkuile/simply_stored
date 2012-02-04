@@ -9,9 +9,16 @@ module SimplyStored
         association_property = if name.to_s.index('__')
                                  # Already defined properly
                                  name
+                               elsif options[:class_name].present?
+                                 # Determine namespace and replace last argument with given name
+                                 name_hierarchy = options[:class_name].to_s.underscore.split(/\/|::/)
+                                 name_hierarchy[-1] = name
+                                 name_hierarchy.join('__')
                                elsif rindex = foreign_property.to_s.rindex('__')
+                                 # Make name based on current namespace
                                  "#{foreign_property[0...rindex]}__#{name}"
                                else
+                                 # Just return the good old name
                                  name
                                end
 
