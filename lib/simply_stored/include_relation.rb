@@ -69,7 +69,7 @@ class Array
 
           # Make sure every object has a cached value, no more loading is done
           obj.instance_variable_set("@#{relation}", {:all => []}) unless obj.instance_variable_get("@#{relation}").try('[]', :all)
-          obj.instance_variable_get("@#{relation}")[:all] += found_relation_objects if found_relation_objects.any?
+          obj.instance_variable_get("@#{relation}")[:all] |= found_relation_objects if found_relation_objects.any?
         end 
       when SimplyStored::Couch::BelongsTo::Property then
         key = "#{relation}_id"
