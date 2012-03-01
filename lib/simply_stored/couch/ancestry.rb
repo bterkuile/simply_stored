@@ -3,7 +3,7 @@ module SimplyStored
     module Ancestry
       module InstanceMethods
         def children
-          return @children if @children.present?
+          return @children if @children
           if root_property = self.class.ancestry_by_property
             @children = self.class.database.view(self.class.children_view(:startkey => [send(root_property), id], :endkey => [send(root_property), id, {}], :reduce => false))
           else
@@ -12,21 +12,43 @@ module SimplyStored
           @children
         end
         def children=(val)
+          @old_descendants = descendants
           @children = val
+          @children.map(&:subtree) # preload children hierarchy
+          @new_descendants = []
+          for child in @children
+            for descendant in child.descendants
+              @new_descendants << descendant
+            end 
+          end
+          @old_descendants.each{|d| d.instance_variable_set('@parent', nil); d.path_ids = [d.id]} # old descendants become root
+          (@old_descendants - @new_descendants).map(&:save) # Persist old descendants not present in new descendants
 
-          # update by_property of children if it differs from parent
+          # update by_property of children if it differs from parent (locale or ... orther field is required to have the same values)
           if root_property = self.class.ancestry_by_property
             self_by_property = send(root_property)
-            for child in @children
+            for child in @children | @new_descendants
               child.send("#{root_property}=", self_by_property) if self_by_property != child.send(root_property)
             end
           end
 
-          self.class.set_parent(self, @children)
-          @descendants = nil # reload descendants if requested
+          self.class.set_parent(self, @children) # recurring update of parent in subtree of children
+          @descendants = (@children | @new_descendants)
+          clear_cached_ancestors
 
           # Return wether all children can be saved :)
-          @children.map(&:save).all?
+          (@descendants).map(&:save).all?
+        end
+
+        # reset cache attributes for ancestors
+        def clear_cached_ancestors
+          ansi = self
+          while ancestor = ansi.instance_variable_get('@parent').presence
+            ancestor.instance_variable_set('@descendants', nil)
+            ancestor.instance_variable_set('@children', nil)
+            ansi = ancestor
+          end
+          self
         end
 
         def add_child(child)
@@ -46,17 +68,17 @@ module SimplyStored
 
         # Get all descendants
         def descendants
-          return @descendants if @descendants.present?
+          return @descendants if @descendants
           if root_property = self.class.ancestry_by_property
-            @descendants = self.class.database.view(self.class.subtree_view(:startkey => [send(root_property), id], :endkey => [send(root_property), id, {}], :reduce => false))
+            @descendants = self.class.database.view(self.class.subtree_view(:startkey => [send(root_property), id], :endkey => [send(root_property), id, {}], :reduce => false)).sort_by!{|d| [d.path_ids.size, d.position]}
           else
-            @descendants = self.class.database.view(self.class.subtree_view(:startkey => [id], :endkey => [id, {}], :reduce => false))
+            @descendants = self.class.database.view(self.class.subtree_view(:startkey => [id], :endkey => [id, {}], :reduce => false)).sort_by{|d| [d.path_ids.size, d.position]}
           end
         end
 
-        # Find subtree of a given page
+        # Find subtree of a given page and set children with the result (important to get same children object ids as in descendants)
         def subtree
-          self.class.build_tree(descendants)
+          @children = self.class.build_tree(descendants)
         end
 
         # Triggered before save
@@ -67,6 +89,7 @@ module SimplyStored
             path_ids_will_change!
             self.path_ids = newpath
           end
+          self
         end
 
         # Triggered after create, because needs id
@@ -91,10 +114,11 @@ module SimplyStored
             update_tree_path
             save
           end
+          val
         end
 
         def parent_id=(val)
-          if @parent_id != val.presence
+          if parent_id != val.presence
             @parent = nil
             @parent_id = val.presence
             update_tree_path
@@ -113,6 +137,9 @@ module SimplyStored
           return [] unless parent_ids.any?
           return [parent] if parent_ids.size == 1 # optimization, parent is pre-loaded many times
           (self.class.database.couchrest_database.bulk_load(parent_ids)['rows'] || []).map{|h| h['doc']}.compact
+        end
+        def parents
+          ancestors
         end
 
         def tree_path
@@ -160,7 +187,7 @@ module SimplyStored
 
         view :subtree_view, :type => :custom, :include_docs => true, :map => %|function(doc){
           if(doc['ruby_class'] == '#{name}' && doc.path_ids){
-            for (var i in doc.path_ids){
+            for(var i = 0; i < doc.path_ids.length - 1; i++){
               emit([#{by_property_view_prefix}doc.path_ids[i], doc.path_ids, #{order_by}], 1);
             }
           }
@@ -219,33 +246,44 @@ module SimplyStored
         # Build a tree from a flat set of pages making use of the path attribute
         def build_tree(pages = nil)
           pages ||= all
-          res = OpenStruct.new(:children => []) # Dummy container as traversing begin, contains roots as children
+          return pages if pages.empty? # Do not process empty array
+          @tree_wrapper = OpenStruct.new(:children => []) # Dummy container as traversing begin, contains roots as children
+          old_tree_slice = @tree_wrapper.children
+          new_tree_slice = []
+          pages.sort_by!{|p| [p.path_ids.size, p.position]}
+          root_depth = pages.first.path_ids.size
+          current_depth = root_depth + 1 # Start counting/swapping from one depth deeper than first one
           for page in pages
-            current = res
-            for child_id in page.path_ids
-              child = current.children.find{|p| p.id == child_id}
-              unless child
-                child = pages.find{|p| p.id == child_id} || new(:id => child_id)
-                current.children << child
-              end
-              current = child
+            old_tree_slice << page and next if page.path_ids.size == root_depth # fill first slice with roots
+
+            # Move further if new depth is reached
+            if page.path_ids.size > current_depth
+              old_tree_slice = new_tree_slice
+              new_tree_slice = []
             end
-            # Update last child with actual page
-            child.attributes = page.attributes 
-            child._document = page._document
+            parent = old_tree_slice.find{|r| r.id == page.path_ids[-2]} # path id before last is parent id
+            next unless parent # page is not associated in tree
+
+            # Initialize children if needed
+            parent.instance_variable_set('@children', []) unless parent.instance_variable_get('@children').is_a?(Array)
+            
+            # Avoid database call on deepest children
+            page.instance_variable_set('@children', []) unless page.instance_variable_get('@children').is_a?(Array)
+            parent.instance_variable_get('@children') << page
+            page.instance_variable_set('@parent', parent)
+            page.instance_variable_set('@parent_id', parent.id)
+            new_tree_slice << page
           end
 
-          # Set the parents of all objects from 'cached' results
-          for root in res.children.sort_by!(&:position)
-            set_parent(root, root.children)
-          end
-          res.children
+          #TODO: setting @descendants from cache as option to avoid database call when descendants is required
+          @tree_wrapper.children
         end
 
         # Recursive set parents
         def set_parent(parent, children)
           for child in children.sort_by!(&:position)
-            child.parent = parent
+            child.instance_variable_set('@parent', parent)
+            child.update_tree_path
             set_parent child, child.children 
           end
         end

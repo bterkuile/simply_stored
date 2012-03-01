@@ -279,7 +279,6 @@ module SimplyStored
     
     def get_embedded(*args)
       puts args.inspect
-      debugger
       []
     end
      

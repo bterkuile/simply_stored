@@ -6,10 +6,10 @@ class AncestryTest < Test::Unit::TestCase
     setup do
       CouchPotato::Config.database_name = 'simply_stored_test'
       recreate_db
-      @d1 = Directory.create(:name => 'dir1')
-      @d2 = Directory.create(:name => 'dir2')
-      @d3 = Directory.create(:name => 'dir3')
-      @d4 = Directory.create(:name => 'dir4')
+      @d1 = Directory.create(name: 'dir1', position: 0)
+      @d2 = Directory.create(name: 'dir2', position: 1)
+      @d3 = Directory.create(name: 'dir3', position: 2)
+      @d4 = Directory.create(name: 'dir4', position: 3)
       @a = [@d1, @d2, @d3, @d4]
     end
 
@@ -58,6 +58,41 @@ class AncestryTest < Test::Unit::TestCase
       d4_reloaded = Directory.find(@d4.id)
       assert_equal [@d1, @d3], d4_reloaded.ancestors
     end
+
+    should "give proper descendants" do
+      @d1.children = [@d2, @d3]
+      @d2.children = [@d4]
+      assert_equal [@d2, @d3, @d4], @d1.descendants.sort_by(&:name)
+    end
+
+    should "give a proper subtree and does not change the subject" do
+      # This is a relevant test since it failed in the past
+      @d1.children = [@d2]
+      @d2.children = [@d3, @d4]
+      assert_equal [@d3, @d4], @d2.subtree
+      @d2.reload
+      # This is what it is about
+      assert_equal [@d1.id, @d2.id], @d2.path_ids
+    end
+
+    should "update path_ids on deeper nested elements" do
+      @d2.children = [@d3, @d4]
+      @d1.children = [@d2]
+
+      # Not for now, objects self are not updated
+      #assert_equal [@d1.id, @d2.id, @d3.id], @d3.path_ids
+      #assert_equal [@d1.id, @d2.id, @d4.id], @d4.path_ids
+      @d3.reload
+      @d4.reload
+      assert_equal [@d1.id, @d2.id, @d3.id], @d3.path_ids
+      assert_equal [@d1.id, @d2.id, @d4.id], @d4.path_ids
+    end
+
+    should 'build tree returning actual objects set in descendants' do
+      @d1.children = [@d2, @d3]
+      [@d1, @d2, @d3].map(&:reload)
+      assert_equal @d1.subtree.map(&:object_id).sort, @d1.descendants.map(&:object_id).sort
+    end
   end
   context "namespaced with hierarchy" do
     setup do
@@ -97,6 +132,12 @@ class AncestryTest < Test::Unit::TestCase
       assert_equal [@d4], d2_reloaded.children
       assert_equal @d2, d4_reloaded.parent
       assert_equal [@d1.id, @d2.id, @d4.id], d4_reloaded.path_ids
+    end
+
+    should "return proper parents" do
+      @d1.children = [@d2, @d3]
+      @d2.children = [@d4]
+      assert_equal [@d1, @d2], @d4.parents
     end
 
     should "handle roots" do
