@@ -272,6 +272,7 @@ module SimplyStored
             if page.path_ids.size > current_depth
               old_tree_slice = new_tree_slice
               new_tree_slice = []
+              current_depth = page.path_ids.size
             end
             parent = old_tree_slice.find{|r| r.id == page.path_ids[-2]} # path id before last is parent id
             next unless parent # page is not associated in tree
