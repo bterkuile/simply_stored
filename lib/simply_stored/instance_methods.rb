@@ -57,8 +57,9 @@ module SimplyStored
     alias :delete :destroy
 
     def update_attributes(attributes = {})
+      parent_id_present = attributes.delete(:parent_id) || attributes.delete('parent_id')
       self.attributes = attributes
-      save
+      parent_id_present ? self.parent_id = parent_id_present : save
     end
     
     def attributes=(attr)
@@ -66,6 +67,8 @@ module SimplyStored
     end
 
     def reload
+      @children = nil
+      @descendants = nil
       instance = self.class.find(_id, :with_deleted => true)
       instance.attributes.each do |attribute, value|
         send "#{attribute}=", value
