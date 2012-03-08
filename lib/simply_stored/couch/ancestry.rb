@@ -110,8 +110,8 @@ module SimplyStored
         def parent=(val)
           if @parent != val
             @parent = val
-            @parent.children += [self] unless @parent.children.include?(self)
             update_tree_path
+            @parent.children += [self] unless @parent.children.include?(self)
             save
           end
           val
@@ -125,7 +125,8 @@ module SimplyStored
             if @parent_id
               parent.children = parent.children | [self]
             else
-              self.children = self.children # update descendant path_ids
+              current_children = children
+              self.children = current_children # update descendant path_ids
             end
           end
         end
