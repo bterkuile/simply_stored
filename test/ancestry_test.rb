@@ -75,9 +75,22 @@ class AncestryTest < Test::Unit::TestCase
       assert_equal [@d1.id, @d2.id], @d2.path_ids
     end
 
-    should "update path_ids on deeper nested elements" do
+    should "update path_ids on deeper nested elements using children=" do
       @d2.children = [@d3, @d4]
       @d1.children = [@d2]
+
+      # Not for now, objects self are not updated
+      #assert_equal [@d1.id, @d2.id, @d3.id], @d3.path_ids
+      #assert_equal [@d1.id, @d2.id, @d4.id], @d4.path_ids
+      @d3.reload
+      @d4.reload
+      assert_equal [@d1.id, @d2.id, @d3.id], @d3.path_ids
+      assert_equal [@d1.id, @d2.id, @d4.id], @d4.path_ids
+    end
+    should "update path_ids on deeper nested elements using parent_id=" do
+      @d2.children = [@d3, @d4]
+      [@d2, @d3, @d4].map(&:reload)
+      @d2.parent_id = @d1.id
 
       # Not for now, objects self are not updated
       #assert_equal [@d1.id, @d2.id, @d3.id], @d3.path_ids
