@@ -121,8 +121,12 @@ module SimplyStored
           if parent_id != val.presence
             @parent = nil
             @parent_id = val.presence
-            parent.children = parent.children | [self]
             update_tree_path
+            if @parent_id
+              parent.children = parent.children | [self]
+            else
+              self.children = self.children # update descendant path_ids
+            end
           end
         end
 
