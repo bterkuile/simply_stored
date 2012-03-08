@@ -74,6 +74,8 @@ module SimplyStored
           else
             @descendants = self.class.database.view(self.class.subtree_view(:startkey => [id], :endkey => [id, {}], :reduce => false)).sort_by{|d| [d.path_ids.size, d.position]}
           end
+          @children = self.class.build_tree(@descendants)
+          @descendants
         end
 
         # Find subtree of a given page and set children with the result (important to get same children object ids as in descendants)
@@ -121,16 +123,17 @@ module SimplyStored
           if parent_id != val.presence
             @parent = nil
             @parent_id = val.presence
+            subtree
+            path_ids_will_change!
             if @parent_id
-              update_tree_path
-              parent.children = parent.children | [self]
+              @parent = parent
+              self.path_ids = parent.path_ids + [id]
+              self.class.set_parent(self, @children)
             else
-              subtree
-              path_ids_will_change!
               self.path_ids = [id]
               self.class.set_parent(self, @children)
-              @descendants.map(&:save) if save
             end
+            @descendants.map(&:save) if save
           end
         end
 
@@ -197,14 +200,14 @@ module SimplyStored
         view :subtree_view, :type => :custom, :include_docs => true, :map => %|function(doc){
           if(doc['ruby_class'] == '#{name}' && doc.path_ids){
             for(var i = 0; i < doc.path_ids.length - 1; i++){
-              emit([#{by_property_view_prefix}doc.path_ids[i], doc.path_ids, #{order_by}], 1);
+              emit([#{by_property_view_prefix}doc.path_ids[i], #{order_by}], 1);
             }
           }
         }|, :reduce => "_sum"
 
         view :children_view, :type => :custom, :include_docs => true, :map => %|function(doc){
           if(doc['ruby_class'] == '#{name}' && doc.path_ids){
-            emit([#{by_property_view_prefix}doc.path_ids.slice(-2,-1)[0], doc.path_ids, #{order_by}], 1);
+            emit([#{by_property_view_prefix}doc.path_ids.slice(-2,-1)[0], #{order_by}], 1);
           }
         }|, :reduce => "_sum"
         view :roots_view, :conditions => "doc.path_ids && doc.path_ids.length == 1", :key => [options[:by_property].presence, options[:order_by]].compact

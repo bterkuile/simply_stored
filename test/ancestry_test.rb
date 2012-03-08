@@ -123,6 +123,16 @@ class AncestryTest < Test::Unit::TestCase
       assert_equal [@d2.id, @d4.id], @d4.path_ids
     end
 
+    should "preserve children of parent when another is added through parent_id=" do
+      # Yes, this one failed once
+
+      # Copy of previous
+      @d2.children = [@d3]
+      [@d2, @d3, @d4].map(&:reload)
+      @d4.parent_id = @d2.id
+      [@d2, @d3, @d4].map(&:reload)
+      assert_equal [@d3, @d4], @d2.children
+    end
     should "not update descendants when parent_id is set in update_attributes and save is not valid" do
       # Copy of previous
       @d2.children = [@d3, @d4]
