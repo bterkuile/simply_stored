@@ -129,8 +129,7 @@ module SimplyStored
               path_ids_will_change!
               self.path_ids = [id]
               self.class.set_parent(self, @children)
-              @descendants.map(&:save)
-              save
+              @descendants.map(&:save) if save
             end
           end
         end

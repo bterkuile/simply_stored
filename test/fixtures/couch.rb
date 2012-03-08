@@ -33,8 +33,17 @@ class Directory
   include SimplyStored::Couch
 
   property :name
+  property :make_invalid
 
   has_ancestry
+
+  validate :check_if_valid
+
+  private
+
+  def check_if_valid
+    errors.add(:make_invalid, :invalid) if make_invalid.present?
+  end
 end
 
 class NamespacedDirectory

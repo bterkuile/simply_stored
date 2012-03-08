@@ -59,7 +59,16 @@ module SimplyStored
     def update_attributes(attributes = {})
       parent_id_present = attributes.delete(:parent_id) || attributes.delete('parent_id')
       self.attributes = attributes
-      parent_id_present ? self.parent_id = parent_id_present : save
+      if parent_id_present
+        if valid?
+          self.parent_id = parent_id_present
+          save # only for return value, revalidate etc.
+        else
+          return false
+        end
+      else 
+        save
+      end
     end
     
     def attributes=(attr)

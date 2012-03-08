@@ -13,6 +13,10 @@ class AncestryTest < Test::Unit::TestCase
       @a = [@d1, @d2, @d3, @d4]
     end
 
+    should "be invalid if make_invalid is an option" do
+      assert_equal false, @d1.update_attributes(:make_invalid => true) 
+    end
+
     should "all have a path containing own id" do
       assert_equal @a.map(&:id), @a.map(&:path_ids).flatten
     end
@@ -117,6 +121,18 @@ class AncestryTest < Test::Unit::TestCase
       [@d2, @d3, @d4].map(&:reload)
       assert_equal [@d2.id, @d3.id], @d3.path_ids
       assert_equal [@d2.id, @d4.id], @d4.path_ids
+    end
+
+    should "not update descendants when parent_id is set in update_attributes and save is not valid" do
+      # Copy of previous
+      @d2.children = [@d3, @d4]
+      [@d2, @d3, @d4].map(&:reload)
+      @d2.update_attributes(:parent_id => @d1.id, :make_invalid => true)
+
+      [@d1, @d2, @d3, @d4].map(&:reload)
+      assert_equal [@d2.id, @d3.id], @d3.path_ids
+      assert_equal [@d2.id, @d4.id], @d4.path_ids
+
     end
 
     should 'build tree returning actual objects set in descendants' do
