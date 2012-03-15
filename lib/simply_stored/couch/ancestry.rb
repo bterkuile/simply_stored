@@ -197,19 +197,19 @@ module SimplyStored
           by_property_view_prefix = options[:by_property].present? ? "doc['#{options[:by_property]}'], " : ''
         end
 
-        view :subtree_view, :type => :custom, :include_docs => true, :map => %|function(doc){
+        view :subtree_view, :type => :custom, :include_docs => true, :map_function => %|function(doc){
           if(doc['ruby_class'] == '#{name}' && doc.path_ids){
             for(var i = 0; i < doc.path_ids.length - 1; i++){
               emit([#{by_property_view_prefix}doc.path_ids[i], #{order_by}], 1);
             }
           }
-        }|, :reduce => "_sum"
+        }|, :reduce_function => "_sum"
 
-        view :children_view, :type => :custom, :include_docs => true, :map => %|function(doc){
+        view :children_view, :type => :custom, :include_docs => true, :map_function => %|function(doc){
           if(doc['ruby_class'] == '#{name}' && doc.path_ids){
             emit([#{by_property_view_prefix}doc.path_ids.slice(-2,-1)[0], #{order_by}], 1);
           }
-        }|, :reduce => "_sum"
+        }|, :reduce_function => "_sum"
         view :roots_view, :conditions => "doc.path_ids && doc.path_ids.length == 1", :key => [options[:by_property].presence, options[:order_by]].compact
         include SimplyStored::Couch::Ancestry::InstanceMethods
         extend SimplyStored::Couch::Ancestry::ClassMethods

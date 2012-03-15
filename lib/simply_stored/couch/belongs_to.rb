@@ -36,9 +36,9 @@ module SimplyStored
         
         reduce_definition = "_sum"
         view "association_#{foreign_property}_belongs_to_#{association_property}",
-          :map => map_definition_without_deleted,
-          :reduce => reduce_definition,
-          :type => "custom",
+          :map_function => map_definition_without_deleted,
+          :reduce_function => reduce_definition,
+          :type => :custom,
           :include_docs => true
           
         map_definition_with_deleted = <<-eos
@@ -50,9 +50,9 @@ module SimplyStored
         eos
          
         view "association_#{foreign_property}_belongs_to_#{association_property}_with_deleted",
-          :map => map_definition_with_deleted,
-          :reduce => reduce_definition,
-          :type => "custom",
+          :map_function => map_definition_with_deleted,
+          :reduce_function => reduce_definition,
+          :type => :custom,
           :include_docs => true
             
         properties << SimplyStored::Couch::BelongsTo::Property.new(self, name, options)

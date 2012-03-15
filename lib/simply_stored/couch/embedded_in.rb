@@ -25,9 +25,9 @@ module SimplyStored
         reduce_definition = "_sum"
          
         view "association_#{self.name.underscore.gsub('/', '__')}_embedded_in_#{name}",
-          :map => map_definition_without_deleted,
-          :reduce => reduce_definition,
-          :type => "custom",
+          :map_function => map_definition_without_deleted,
+          :reduce_function => reduce_definition,
+          :type => :custom,
           :include_docs => true
           
         map_definition_with_deleted = <<-eos
@@ -39,9 +39,9 @@ module SimplyStored
         eos
          
         view "association_#{self.name.underscore.gsub('/', '__')}_embedded_in_#{name}_with_deleted",
-          :map => map_definition_with_deleted,
-          :reduce => reduce_definition,
-          :type => "custom",
+          :map_function => map_definition_with_deleted,
+          :reduce_function => reduce_definition,
+          :type => :custom,
           :include_docs => true
             
         properties << SimplyStored::Couch::EmbeddedIn::Property.new(self, name, options)
@@ -79,14 +79,14 @@ module SimplyStored
                 super(*([belongs_to_name] + args))
                 # Now override belongs to view
                 view "association_#{foreign_property}_belongs_to_#{belongs_to_name}",
-                  :map => %|function(doc){if(doc['ruby_class'] == '#{embedded_in_class_name}' && doc['#{self.name.property_name.pluralize}']){
+                  :map_function => %|function(doc){if(doc['ruby_class'] == '#{embedded_in_class_name}' && doc['#{self.name.property_name.pluralize}']){
                     for(var i in doc.#{self.name.property_name.pluralize}){
                       if(doc['#{self.name.property_name.pluralize}'][i]['#{belongs_to_name.to_s.foreign_key}']){
                         emit([doc['#{self.name.property_name.pluralize}'][i]['#{belongs_to_name.to_s.foreign_key}'], doc['created_at']], doc['#{self.name.property_name.pluralize}'][i]);
                       }
                     }
                   }}|,
-                  :reduce => %|function(key, values){return values.length}|,
+                  :reduce_function => %|function(key, values){return values.length}|,
                   :type => :raw,
                   :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d.parent_object.send(self.name.property_name.pluralize)[d.index]}},
                   :include_docs => true
@@ -107,14 +107,14 @@ module SimplyStored
             define_method "==" do |value|
               self.class == value.class && (value.respond_to?(:parent_object) && self.parent_object == value.parent_object) && (value.respond_to?(:index) && self.index == value.index)
             end
-            view :all_documents_for_count, :type => :raw, :include_docs => false, :map => %|function(doc){
+            view :all_documents_for_count, :type => :raw, :include_docs => false, :map_function => %|function(doc){
               if(doc['ruby_class'] == '#{name.to_s.singularize.camelize}' && typeof(doc['#{parent_property_name}']) == 'object'){
                 for(var i=0; i < doc['#{parent_property_name}'].length; i++){
                   emit(doc['#{parent_property_name}'][i]['created_at'], 1);
                 }
               }
-            }|, :reduce => '_sum'
-            view :all_documents, :type => :raw, :include_docs => true, :map => %|function(doc){
+            }|, :reduce_function => '_sum'
+            view :all_documents, :type => :raw, :include_docs => true, :map_function => %|function(doc){
               if(doc['ruby_class'] == '#{name.to_s.singularize.camelize}' && typeof(doc['#{parent_property_name}']) == 'object'){
                 for(var i=0; i < doc['#{parent_property_name}'].length; i++){
                   emit(doc['#{parent_property_name}'][i]['created_at'], doc['#{parent_property_name}'][i]);

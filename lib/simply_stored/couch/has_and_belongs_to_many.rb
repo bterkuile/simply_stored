@@ -48,9 +48,9 @@ module SimplyStored
         eos
 
         view "association_#{self.name.underscore.gsub('/', '__')}_has_and_belongs_to_many_#{name}",
-          :map => map_definition_without_deleted,
-          :reduce => reduce_definition,
-          :type => "custom",
+          :map_function => map_definition_without_deleted,
+          :reduce_function => reduce_definition,
+          :type => :custom,
           :include_docs => true
 
         map_definition_with_deleted = <<-eos
@@ -64,9 +64,9 @@ module SimplyStored
         eos
 
         view "association_#{self.name.underscore.gsub('/', '__')}_has_and_belongs_to_many_#{name}_with_deleted",
-          :map => map_definition_with_deleted,
-          :reduce => reduce_definition,
-          :type => "custom",
+          :map_function => map_definition_with_deleted,
+          :reduce_function => reduce_definition,
+          :type => :custom,
           :include_docs => true
       end
 
