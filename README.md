@@ -15,7 +15,8 @@ More examples on how to work with SimplyStored can be found [here](http://github
 This fork
 ============
 This fork of SimplyStored adds some extras to the standard version. A list of this is:
-* Pagination, use: Person.all(:page => params[:pare], :per\_page => 40) out of the box
+
+* Pagination, use: Person.all(:page => params[:page], :per\_page => 40) out of the box
 * Namespace support, there is working namespace support. It is still in the child phase, but works for me
 * Embedded documents. Embed documents but the orm should just work similar (Speedup choice)
 * Include relations, Advanced relation including, reducing number of queries (Huge speedup for relations)
