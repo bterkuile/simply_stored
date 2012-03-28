@@ -18,6 +18,21 @@ module SimplyStored
       def define_has_and_belongs_to_many_views(name, options)
         key_order = options[:class_storing_keys] == self.name ? "doc.#{options[:foreign_key]}[index], doc._id" : "doc._id, doc.#{options[:foreign_key]}[index]"
         value = options[:class_storing_keys] == self.name ? 1 : "{ _id :doc.#{options[:foreign_key]}[index]}"
+        association_property = if name.to_s.index('__')
+                                 # Already defined properly
+                                 name
+                               elsif options[:class_name].present?
+                                 # Determine namespace and replace last argument with given name
+                                 name_hierarchy = options[:class_name].to_s.underscore.split(/\/|::/)
+                                 name_hierarchy[-1] = name
+                                 name_hierarchy.join('__')
+                               elsif rindex = foreign_property.to_s.rindex('__')
+                                 # Make name based on current namespace
+                                 "#{foreign_property[0...rindex]}__#{name}"
+                               else
+                                 # Just return the good old name
+                                 name
+                               end
 
         map_definition_without_deleted = <<-eos
           function(doc) {
@@ -47,7 +62,7 @@ module SimplyStored
           }
         eos
 
-        view "association_#{self.name.underscore.gsub('/', '__')}_has_and_belongs_to_many_#{name}",
+        view "association_#{foreign_property}_has_and_belongs_to_many_#{association_property}",
           :map_function => map_definition_without_deleted,
           :reduce_function => reduce_definition,
           :type => :custom,
@@ -171,16 +186,16 @@ module SimplyStored
         def initialize(owner_clazz, name, options = {})
           options = {
             :storing_keys => false,
-            :class_name => name.to_s.singularize.camelize,
+            :class_name => owner_clazz.find_association_class_name(name),
             :foreign_key => nil,
           }.update(options)
 
           # there is only one pair of foreign_keys and it usualy the name of the class not storing the keys
           if options[:foreign_key].blank?
             if options[:storing_keys]
-              options[:foreign_key] = options[:class_name].singularize.underscore.gsub('/', '__').foreign_key.pluralize
+              options[:foreign_key] = options[:class_name].singularize.underscore.sub(/.*\//, '').foreign_key.pluralize
             else
-              options[:foreign_key] = owner_clazz.name.singularize.underscore.gsub('/', '__').foreign_key.pluralize
+              options[:foreign_key] = owner_clazz.name.singularize.underscore.sub(/.*\//, '').foreign_key.pluralize
             end
           end
           options[:class_storing_keys] = options[:storing_keys] ? owner_clazz.name : options[:class_name]
