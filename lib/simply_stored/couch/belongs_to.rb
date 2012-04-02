@@ -105,7 +105,7 @@ module SimplyStored
               end
 
               # Mark changed if appropriate
-              send("#{name}_will_change!") if value != instance_variable_get("@#{name}")
+              # send("#{name}_will_change!") if value != instance_variable_get("@#{name}") is not a persisted property, do not mark as changed
 
               instance_variable_set("@#{name}", value)
               if value.nil?
