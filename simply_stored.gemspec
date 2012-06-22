@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{simply_stored}
-  s.version = "0.5.4"
+  s.version = "1.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Mathias Meyer, Jonathan Weiss"]
-  s.date = %q{2011-04-14}
+  s.date = %q{2012-05-22}
   s.description = %q{Convenience layer for CouchDB on top of CouchPotato.}
   s.email = %q{info@peritor.com}
   s.extra_rdoc_files = [
@@ -51,7 +51,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/peritor/simply_stored}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
+  s.rubygems_version = %q{1.8.24}
   s.summary = %q{Convenience layer for CouchDB}
   s.test_files = [
     "test/active_model_compatibility_test.rb",

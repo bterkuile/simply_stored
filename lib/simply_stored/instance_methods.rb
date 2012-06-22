@@ -275,7 +275,7 @@ module SimplyStored
     end
     
     def find_associated(from, to, options = {})
-      foreign_key = (options.delete(:foreign_key) || self.class.name.singularize.property_name.foreign_key).gsub(/_id$/, '')
+      foreign_key = (options.delete(:foreign_key) || self.class.name.singularize.property_name.foreign_key).to_s.gsub(/_id$/, '')
       view_options = _default_view_options(options)
 
       if options[:with_deleted]

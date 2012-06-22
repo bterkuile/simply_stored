@@ -14,13 +14,6 @@ class ValidationsTest < Test::Unit::TestCase
         assert !category.save
       end
     
-      should "validate when the attribute is an array" do
-        category = Category.new(:name => ['drinks', 'food'])
-        assert_nothing_raised do
-          category.save!
-        end
-      end
-    
       should "add an error message" do
         category = Category.new(:name => "other")
         category.valid?
@@ -30,6 +23,15 @@ class ValidationsTest < Test::Unit::TestCase
       should "allow blank" do
         category = Category.new(:name => nil)
         assert category.valid?
+      end
+    end
+
+    context "with validates_subset_of" do
+      should "validate when the attribute is an array" do
+        category = Category.new(:name => ['drinks', 'food'])
+        assert_nothing_raised do
+          category.save!
+        end
       end
     end
     
