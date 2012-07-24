@@ -193,9 +193,9 @@ module SimplyStored
           # there is only one pair of foreign_keys and it usualy the name of the class not storing the keys
           if options[:foreign_key].blank?
             if options[:storing_keys]
-              options[:foreign_key] = options[:class_name].singularize.underscore.sub(/.*\//, '').foreign_key.pluralize
+              options[:foreign_key] = options[:class_name].singularize.underscore.sub(/.*\//, '').foreign_key.pluralize.to_sym
             else
-              options[:foreign_key] = owner_clazz.name.singularize.underscore.sub(/.*\//, '').foreign_key.pluralize
+              options[:foreign_key] = owner_clazz.name.singularize.underscore.sub(/.*\//, '').foreign_key.pluralize.to_sym
             end
           end
           options[:class_storing_keys] = options[:storing_keys] ? owner_clazz.name : options[:class_name]

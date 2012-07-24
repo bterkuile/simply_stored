@@ -311,7 +311,7 @@ module SimplyStored
     end
     
     def find_associated_via_join_view(from, to, options = {})
-      foreign_key = options.delete(:foreign_key).gsub(/_ids$/, '').pluralize
+      foreign_key = options.delete(:foreign_key).to_s.gsub(/_ids$/, '').pluralize
       view_options = _default_view_options(options)
 
       if options[:with_deleted]
