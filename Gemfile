@@ -7,6 +7,6 @@ gem 'couch_potato', :git => 'git://github.com/bterkuile/couch_potato.git' #, '0.
 gem 'shoulda'
 gem 'shoulda-addons'
 gem 'mocha'
-gem 'ruby-debug19', :require => 'ruby-debug'
+gem 'pry'
 gem 'activesupport' #, '~> 3.0.7', :require => 'active_support'
 gem 'right_aws'

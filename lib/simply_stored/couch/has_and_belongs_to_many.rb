@@ -88,12 +88,12 @@ module SimplyStored
       def define_has_and_belongs_to_many_getter(name, options)
         define_method(name) do |*args|
           local_options = args.first && args.first.is_a?(Hash) && args.first
-          forced_reload, with_deleted, limit, descending = extract_association_options(local_options)
+          forced_reload, with_deleted, limit, descending, skip = extract_association_options(local_options)
 
           cached_results = send("_get_cached_#{name}")
           cache_key = _cache_key_for(local_options)
           if forced_reload || cached_results[cache_key].nil?
-            cached_results[cache_key] = find_associated_via_join_view(options[:class_name], self.class, :with_deleted => with_deleted, :limit => limit, :descending => descending, :foreign_key => options[:foreign_key])
+            cached_results[cache_key] = find_associated_via_join_view(options[:class_name], self.class, :with_deleted => with_deleted, :limit => limit, :descending => descending, :foreign_key => options[:foreign_key], :skip => skip)
             instance_variable_set("@#{name}", cached_results)
           end
           cached_results[cache_key]

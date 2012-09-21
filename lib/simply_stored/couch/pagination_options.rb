@@ -42,6 +42,7 @@ module SimplyStored
               return 1 if total_entries.zero?
               (total_entries.to_f / #{per_page}).ceil
             end
+            alias :#{total_pages_method} :#{num_pages_method}
             def #{per_page_method}
               #{per_page}
             end

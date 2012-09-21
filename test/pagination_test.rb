@@ -50,5 +50,26 @@ class PaginationTest < Test::Unit::TestCase
       assert_equal 6, result.total_count
       assert_equal 3, result.num_pages
     end
+
+    should "paginate has and belongs to many view" do
+      server = Server.create
+      for klass in 'A'..'Z'
+        server.add_network Network.create( klass: klass)
+      end
+      res = Network.with_pagination_options(startkey: [server.id], endkey: ["#{server.id}\u9999"], page: 1, per_page: 100, reduce: false, include_docs: true) do |o|
+        CouchPotato.database.view(Network.association_server_has_and_belongs_to_many_networks(o))
+      end
+      assert_equal 26, res.size
+    end
+    should "paginate has and belongs to many view with non trivial options" do
+      server = Server.create
+      for klass in 'A'..'Z'
+        server.add_network Network.create( klass: klass)
+      end
+      res = Network.with_pagination_options(startkey: [server.id], endkey: ["#{server.id}\u9999"], page: 2, per_page: 3, reduce: false, include_docs: true) do |o|
+        CouchPotato.database.view(Network.association_network_has_and_belongs_to_many_servers(o))
+      end
+      assert_equal 3, res.size
+    end
   end
 end

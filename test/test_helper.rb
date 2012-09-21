@@ -3,7 +3,7 @@ require 'test/unit'
 require 'bundler/setup'
 require 'active_support/testing/assertions'
 require 'shoulda'
-require 'ruby-debug'
+require 'pry'
 require 'mocha'
 $:.unshift(File.expand_path(File.dirname(__FILE__) + "/../lib"))
 puts File.expand_path(File.dirname(__FILE__) + "/lib")

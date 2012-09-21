@@ -141,6 +141,7 @@ module SimplyStored
       with_deleted = false
       limit = nil
       descending = false
+      skip = nil
       
       if local_options
         local_options.assert_valid_keys(:force_reload, :with_deleted, :limit, :order)
@@ -148,8 +149,9 @@ module SimplyStored
         with_deleted = local_options[:with_deleted]
         limit = local_options[:limit]
         descending = (local_options[:order] == :desc) ? true : false
+        skip = local_options[:skip]
       end
-      return [forced_reload, with_deleted, limit, descending]
+      return [forced_reload, with_deleted, limit, descending, skip]
     end
 
     def self.delete_all_design_documents(database)
