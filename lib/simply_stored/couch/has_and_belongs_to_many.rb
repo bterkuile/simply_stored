@@ -92,6 +92,7 @@ module SimplyStored
 
           cached_results = send("_get_cached_#{name}")
           cache_key = _cache_key_for(local_options)
+          return cached_results[cache_key] || [] unless persisted?
           if forced_reload || cached_results[cache_key].nil?
             cached_results[cache_key] = find_associated_via_join_view(options[:class_name], self.class, :with_deleted => with_deleted, :limit => limit, :descending => descending, :foreign_key => options[:foreign_key], :skip => skip)
             instance_variable_set("@#{name}", cached_results)
