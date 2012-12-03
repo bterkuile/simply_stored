@@ -645,6 +645,25 @@ class HasAndBelongsToManyTest < Test::Unit::TestCase
 
       end
 
+      context "when not persisted" do
+        should "not return objects when a record is not persisted on storing keys" do
+          router = Router.new
+          other_router = Router.create
+          network = Network.create
+          other_router.network_ids = [network.id]
+          other_router.save
+          assert_empty router.networks
+        end
+        should "not return objects when a record is not persisted on non storing keys" do
+          router = Router.create
+          other_router = Router.create
+          other_network = Network.create
+          other_router.network_ids = [other_network.id]
+          network = Network.new
+          assert_empty network.routers
+        end
+      end
+
     end
   end
 end
