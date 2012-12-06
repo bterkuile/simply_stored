@@ -57,7 +57,7 @@ class PaginationTest < Test::Unit::TestCase
         server.add_network Network.create( klass: klass)
       end
       res = Network.with_pagination_options(startkey: [server.id], endkey: ["#{server.id}\u9999"], page: 1, per_page: 100, reduce: false, include_docs: true) do |o|
-        CouchPotato.database.view(Network.association_server_has_and_belongs_to_many_networks(o))
+        CouchPotato.database.view(Network.association_network_has_and_belongs_to_many_servers(o))
       end
       assert_equal 26, res.size
     end

@@ -217,7 +217,24 @@ Custom Associations
 Validations
 =============
 
-Validations are handled by ActiveModel 
+Validations are handled by ActiveModel, There are two exceptions:
+
+1. The uniqueness validator
+2. The containment validator
+
+The containment validator checks wether an array property is contained within a specified boundary
+
+    class Page
+      include SimplyStored::Couch
+
+      property :categories
+
+      validates_containment_of :categories, in: %[one two three]
+    end
+
+    Page.new.valid? #=> true
+    Page.new(categories: %w[one three]).valid? #=> true
+    Page.new(categories: %w[one four]).valid? #=> false
 
 S3 Attachments
 =============

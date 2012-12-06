@@ -16,6 +16,10 @@ module SimplyStored
            }"
         end
 
+        def key
+          @options[:key]
+        end
+
       end
     end
   end

@@ -1,6 +1,11 @@
 Changelog
 =============
 
+1.0.0
+-----
+- Added Contaiment validator
+- Lots of other stuff
+
 0.6.8
 
 - Lax restriction on ActiveSupport version

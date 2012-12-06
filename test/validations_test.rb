@@ -26,15 +26,6 @@ class ValidationsTest < Test::Unit::TestCase
       end
     end
 
-    context "with validates_subset_of" do
-      should "validate when the attribute is an array" do
-        category = Category.new(:name => ['drinks', 'food'])
-        assert_nothing_raised do
-          category.save!
-        end
-      end
-    end
-    
     context "with validates_format_of" do
       class ValidatedUser
         include SimplyStored::Couch
@@ -137,6 +128,24 @@ class ValidationsTest < Test::Unit::TestCase
         user = UniqueUser.create(:name => "Host Master")
         assert 5 != user
         assert user != 5
+      end
+    end
+
+    context "containment" do
+      should "not raise an error when no name is set" do
+        assert_nothing_raised do
+          Page.new.save
+        end
+      end
+
+      should "be valid when argument is contained in specification" do
+        page  = Page.new(:categories => %w[one three])
+        assert page.valid?
+      end
+
+      should "not be valid when attribute containes value not withing specified containment" do
+        page  = Page.new(:categories => %w[one four])
+        assert_equal false, page.valid?
       end
     end
     

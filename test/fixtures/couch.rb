@@ -29,6 +29,14 @@ class EmbeddedComment
   belongs_to :strict_post
 end
 
+class Page
+  include SimplyStored::Couch
+
+  property :categories, type: Array
+
+  validates_containment_of :categories, :in => %w[one two three]
+end
+
 class Directory
   include SimplyStored::Couch
 

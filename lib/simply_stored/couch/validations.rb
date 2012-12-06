@@ -13,6 +13,16 @@ module SimplyStored
       def validates_uniqueness_of(*attr_names)
         validates_with UniquenessValidator, _merge_attributes(attr_names)
       end
+      class ContainmentValidator < ActiveModel::EachValidator
+        def validate_each(record, attribute, value)
+          unless Array.wrap(value) - options[:in] == []
+            record.errors.add(attribute, :inclusion, options.except(:in, :within).merge!(:value => value))
+          end
+        end
+      end
+      def validates_containment_of(*attr_names)
+        validates_with ContainmentValidator, _merge_attributes(attr_names)
+      end
     end
   end
 end
