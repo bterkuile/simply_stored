@@ -224,7 +224,7 @@ class FinderTest < Test::Unit::TestCase
       end
 
       should "return an empty array  for multiple finders when no result is found" do
-        assert_empty User.find_by_title_and_homepage("Mr.", "http://www.companytools.nl/")
+        assert_empty User.find_all_by_title_and_homepage("Mr.", "http://www.companytools.nl/")
       end
 
       should "find records when the finder ends with an exclamation mark!" do
