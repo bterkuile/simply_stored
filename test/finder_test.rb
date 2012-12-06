@@ -138,6 +138,36 @@ class FinderTest < Test::Unit::TestCase
           User.find_by_title(1,2,3,4,5)
         end
       end
+
+      should "return nil when no result is found" do
+        assert_nil User.find_by_title("Mr.")
+      end
+
+      should "return nil for multiple finders when no result is found" do
+        assert_nil User.find_by_title_and_homepage("Mr.", "http://www.companytools.nl/")
+      end
+
+      should "find a record when it ends with an exclamation mark!" do
+        User.create(:title => "Mr.")
+        assert User.find_by_title!("Mr.").is_a?(User)
+      end
+
+      should "return raise a not found exception when called using an exclamation mark! and is no record is found" do
+        assert_raise(SimplyStored::RecordNotFound) do
+          User.find_by_title!("Mr.")
+        end
+      end
+
+      should "find a record using multiple arguments when it ends with an exclamation mark!" do
+        User.create(:title => "Mr.", :homepage => "http://www.companytools.nl/")
+        assert User.find_by_title_and_homepage!("Mr.", "http://www.companytools.nl/").is_a?(User)
+      end
+
+      should "return raise a not found exception when called using an exclamation mark! and no record is found" do
+        assert_raise(SimplyStored::RecordNotFound) do
+          User.find_by_title_and_homepage!("Mr.", "http://www.companytools.nl/")
+        end
+      end
     end
     
     context "with a find_all_by prefix" do
@@ -186,6 +216,39 @@ class FinderTest < Test::Unit::TestCase
         
         assert_raise(ArgumentError) do
           User.find_all_by_title(1,2,3,4,5)
+        end
+      end
+
+      should "return an empty array when no result is found" do
+        assert_empty User.find_all_by_title("Mr.")
+      end
+
+      should "return an empty array  for multiple finders when no result is found" do
+        assert_empty User.find_by_title_and_homepage("Mr.", "http://www.companytools.nl/")
+      end
+
+      should "find records when the finder ends with an exclamation mark!" do
+        u1 = User.create(:name => 'john', :title => "Mr.")
+        u2 = User.create(:name => 'doe',  :title => "Mr.")
+        assert_equal %w[doe john], User.find_all_by_title!("Mr.").sort_by(&:name)
+      end
+
+      should "return raise a not found exception when called using an exclamation mark! and is no records are found" do
+        assert_raise(SimplyStored::RecordNotFound) do
+          User.find_all_by_title!("Mr.")
+        end
+      end
+
+      should "find records using multiple arguments when the finder ends with an exclamation mark!" do
+        User.create(:name => 'john', :title => "Mr.", :homepage => "http://www.companytools.nl/")
+        User.create(:name => 'doe',  :title => "Mr.", :homepage => "http://www.companytools.nl/")
+        User.create(:name => 'juan', :title => "Mr.", :homepage => "http://www.peritor.com/")
+        assert_equal %w[doe john], User.find_all_by_title_and_homepage!("Mr.", "http://www.companytools.nl/").sort_by(&:name)
+      end
+
+      should "return raise a not found exception when the finder ends with an exclamation mark! and no records are found" do
+        assert_raise(SimplyStored::RecordNotFound) do
+          User.find_all_by_title_and_homepage!("Mr.", "http://www.companytools.nl/")
         end
       end
     end      
