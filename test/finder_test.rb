@@ -230,7 +230,7 @@ class FinderTest < Test::Unit::TestCase
       should "find records when the finder ends with an exclamation mark!" do
         u1 = User.create(:name => 'john', :title => "Mr.")
         u2 = User.create(:name => 'doe',  :title => "Mr.")
-        assert_equal %w[doe john], User.find_all_by_title!("Mr.").sort_by(&:name)
+        assert_equal %w[doe john], User.find_all_by_title!("Mr.").map(&:name).sort
       end
 
       should "return raise a not found exception when called using an exclamation mark! and is no records are found" do
@@ -243,7 +243,7 @@ class FinderTest < Test::Unit::TestCase
         User.create(:name => 'john', :title => "Mr.", :homepage => "http://www.companytools.nl/")
         User.create(:name => 'doe',  :title => "Mr.", :homepage => "http://www.companytools.nl/")
         User.create(:name => 'juan', :title => "Mr.", :homepage => "http://www.peritor.com/")
-        assert_equal %w[doe john], User.find_all_by_title_and_homepage!("Mr.", "http://www.companytools.nl/").sort_by(&:name)
+        assert_equal %w[doe john], User.find_all_by_title_and_homepage!("Mr.", "http://www.companytools.nl/").map(&:name).sort
       end
 
       should "return raise a not found exception when the finder ends with an exclamation mark! and no records are found" do
