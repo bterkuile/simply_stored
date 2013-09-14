@@ -1,6 +1,8 @@
 require 'active_model'
 require 'couch_potato'
 
+CouchRest.decode_json_objects
+
 require 'active_support'
 unless {}.respond_to?(:assert_valid_keys)
   require 'active_support/core_ext'
