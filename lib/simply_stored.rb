@@ -5,6 +5,8 @@ class String
   end
 end
 
+CouchRest.decode_json_objects
+
 unless defined?(SimplyStored)
   $:<<(File.expand_path(File.dirname(__FILE__) + "/lib"))
   require File.expand_path(File.dirname(__FILE__) + '/simply_stored/instance_methods')
