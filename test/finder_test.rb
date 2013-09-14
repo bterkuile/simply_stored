@@ -263,6 +263,23 @@ class FinderTest < Test::Unit::TestCase
           User.find_all_by_title_and_homepage!("Mr.", "http://www.companytools.nl/")
         end
       end
+      should "find all records through an association" do
+        user1 = User.create(:title => "Mr.")
+        user2 = User.create(:title => "Mrs.")
+        post1 = Post.create user: user1
+        post2 = Post.create user: user1
+        post3 = Post.create user: user2
+        assert_equal [post1, post2].sort_by(&:id), Post.find_all_by_user(user1).sort_by(&:id)
+      end
+
+      should "find all records through an association that raises when not found" do
+        user1 = User.create(:title => "Mr.")
+        user2 = User.create(:title => "Mrs.")
+        post1 = Post.create user: user1
+        post2 = Post.create user: user1
+        post3 = Post.create user: user2
+        assert_equal [post1, post2].sort_by(&:id), Post.find_all_by_user!(user1).sort_by(&:id)
+      end
     end
   end
 

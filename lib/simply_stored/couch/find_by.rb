@@ -9,7 +9,7 @@ module SimplyStored
 
         # replace asociation assignments with their property values if possible
         keys.each.with_index do |key, i|
-          if properties.find{|p| p.name == key}.is_a?(SimplyStored::Couch::BelongsTo::Property)
+          if properties.find{|p| p.name.to_sym == key.to_sym}.is_a?(SimplyStored::Couch::BelongsTo::Property)
             keys[i] = "#{keys[i]}_id"
           end
         end
@@ -78,6 +78,14 @@ module SimplyStored
         raise_when_not_found = name.to_s.end_with?('!')
         name = name.to_s.chop.to_sym if raise_when_not_found
         keys = name.to_s.sub(/^find_all_by_/, "").split("_and_")
+
+        # replace asociation assignments with their property values if possible
+        keys.each.with_index do |key, i|
+          if properties.find{|p| p.name.to_sym == key.to_sym}.is_a?(SimplyStored::Couch::BelongsTo::Property)
+            keys[i] = "#{keys[i]}_id"
+          end
+        end
+
         view_name = name.to_s.sub(/^find_all_/, "").to_sym
         count_name = name.to_s.sub(/^find_all_/, 'count_').to_sym
         view_keys = keys.length == 1 ? keys.first : keys
@@ -101,11 +109,15 @@ module SimplyStored
               with_pagination_options(options.update(:total_entries => send(count_name, *key_args))) do |options|
                 options.assert_valid_keys(:with_deleted, :limit, :skip, :keys)
                 with_deleted = options.delete(:with_deleted)
+
+                key_args.map!{|a| a.is_a?(SimplyStored::Couch) ? a.id : a}
                 options[:key] = key_args.first if key_args.size == 1
                 options[:key] = key_args if key_args.size > 1
                 options[:include_docs] = true
 
                 raise ArgumentError, "Too many or too few arguments, require #{keys.inspect}" unless keys.size == key_args.size || options[:keys]
+
+                key_args.map!{|a| a.is_a?(SimplyStored::Couch) ? a.id : a}
 
                 if soft_deleting_enabled? && !with_deleted
                   options[:key] = Array.wrap(options[:key]) + [nil] # deleted_at
@@ -126,6 +138,8 @@ module SimplyStored
               with_pagination_options(options.update(:total_entries => send(count_name, *key_args))) do |options|
                 options.assert_valid_keys(:with_deleted, :limit, :skip, :keys)
                 with_deleted = options.delete(:with_deleted)
+
+                key_args.map!{|a| a.is_a?(SimplyStored::Couch) ? a.id : a}
                 options[:key] = key_args.first if key_args.size == 1
                 options[:key] = key_args if key_args.size > 1
                 options[:include_docs] = true
