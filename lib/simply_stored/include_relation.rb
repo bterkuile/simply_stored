@@ -90,6 +90,24 @@ class Array
         each do |obj|
           obj.instance_variable_set("@#{relation}", relation_objects.find{|o| o.id == obj.send(key)})
         end
+      when SimplyStored::Couch::HasAndBelongsToMany::Property
+        if property.options[:storing_keys]
+          key = "#{relation.singularize}_ids"
+          # Collect keys for all objects
+          keys = []
+          each do |obj|
+            next unless obj.is_a?(SimplyStored::Couch) && obj.respond_to?(key)
+            keys << obj.send(key)
+          end
+          # Create unique keys, this will optimize stuff and synchronize the object ids
+          keys.compact!.flatten!.uniq!
+
+          # Get from the database
+          relation_objects = CouchPotato.database.couchrest_database.bulk_load(keys)
+          relation_objects = Array.wrap(relation_objects['rows']).map{|r| r['doc']}.compact if relation_objects.is_a?(Hash)
+          relation_objects ||= [] # Ensure array datatype
+          relation_objects.include_relation(followup) if followup
+        end
       end
     end
     self

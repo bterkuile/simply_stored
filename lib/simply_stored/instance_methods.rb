@@ -15,6 +15,7 @@ module SimplyStored
     end
 
     def save(validate = true)
+      validate = validate[:validate] if validate.is_a?(Hash) && validate.has_key?(:validate)
       result = retry_on_conflict do
         retry_on_connection_error do
           self.class.database.save_document(self, validate)

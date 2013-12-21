@@ -34,14 +34,14 @@ module SimplyStored
       clazz.send(:include, CouchPotato::Persistence)
       clazz.send(:include, InstanceMethods)
       clazz.send(:extend, ClassMethods)
-      
+
       clazz.instance_eval do
         attr_accessor :_accessible_attributes, :_protected_attributes
-        
+
         view :all_documents, :key => :created_at
       end
     end
-    
+
     module ClassMethods
       include SimplyStored::ClassMethods::Base
       include SimplyStored::Couch::Database
@@ -59,7 +59,7 @@ module SimplyStored
       include SimplyStored::Couch::PaginationOptions
       include SimplyStored::Storage::ClassMethods
       include SimplyStored::Couch::Ancestry
-      
+
       def create(attributes = {}, &blk)
         instance = new(attributes, &blk)
         instance.save
@@ -71,30 +71,30 @@ module SimplyStored
         instance.save!
         instance
       end
-      
+
       def enable_soft_delete(property_name = :deleted_at)
         @_soft_delete_attribute = property_name.to_sym
         property property_name, :type => Time
         _define_hard_delete_methods
         _define_soft_delete_views
       end
-      
+
       def soft_delete_attribute
         @_soft_delete_attribute
       end
-      
+
       def soft_deleting_enabled?
         !soft_delete_attribute.nil?
       end
-      
+
       def auto_conflict_resolution_on_save
         @auto_conflict_resolution_on_save.nil? ? true : @auto_conflict_resolution_on_save
       end
-      
+
       def auto_conflict_resolution_on_save=(val)
         @auto_conflict_resolution_on_save = val
       end
-      
+
       def method_missing(name, *args)
         if name.to_s =~ /^find_by/
           _define_find_by(name, *args)
@@ -106,17 +106,17 @@ module SimplyStored
           super
         end
       end
-      
+
       def _define_hard_delete_methods
         define_method("destroy!") do
           destroy(true)
         end
-        
+
         define_method("delete!") do
           destroy(true)
         end
       end
-      
+
       def _define_soft_delete_views
         view :all_documents_without_deleted, :type => SimplyStored::Couch::Views::DeletedModelViewSpec
       end
@@ -144,7 +144,7 @@ module SimplyStored
       limit = nil
       descending = false
       skip = nil
-      
+
       if local_options
         local_options.assert_valid_keys(:force_reload, :with_deleted, :limit, :order)
         forced_reload = local_options.delete(:force_reload)
@@ -180,6 +180,6 @@ module SimplyStored
       end
       design_docs.size
     end
-    
+
   end
 end

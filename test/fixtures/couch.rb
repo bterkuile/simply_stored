@@ -178,6 +178,20 @@ class Membership
   belongs_to :journal
 end
 
+class Callbacker
+  include SimplyStored::Couch
+  property :name
+
+  after_save :raise_error_after_save
+
+  private
+
+  def raise_error_after_save
+    raise StandardError
+  end
+
+end
+
 class Hemorrhoid
   include SimplyStored::Couch
   
