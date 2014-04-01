@@ -92,20 +92,23 @@ class Array
         end
       when SimplyStored::Couch::HasAndBelongsToMany::Property
         if property.options[:storing_keys]
-          key = "#{relation.singularize}_ids"
-          # Collect keys for all objects
-          keys = []
+          key = "#{relation.to_s.singularize}_ids"
+          # Collect relation ids for all objects
+          relation_ids = []
           each do |obj|
-            next unless obj.is_a?(SimplyStored::Couch) && obj.respond_to?(key)
-            keys << obj.send(key)
+            next unless obj.is_a?(SimplyStored::Couch) && obj.respond_to?(key) && obj.send(key).present?
+            relation_ids += obj.send(key)
           end
-          # Create unique keys, this will optimize stuff and synchronize the object ids
-          keys.compact!.flatten!.uniq!
+          # Create unique list of ids, this will optimize stuff and synchronize the object ids
+          relation_ids = relation_ids.flatten.compact.uniq
 
           # Get from the database
-          relation_objects = CouchPotato.database.couchrest_database.bulk_load(keys)
+          relation_objects = CouchPotato.database.couchrest_database.bulk_load(relation_ids)
           relation_objects = Array.wrap(relation_objects['rows']).map{|r| r['doc']}.compact if relation_objects.is_a?(Hash)
           relation_objects ||= [] # Ensure array datatype
+          each do |obj|
+            obj.instance_variable_set("@#{relation}", {all: relation_objects.select{|o| Array.wrap(obj.send(key)).include?(o.id)}})
+          end
           relation_objects.include_relation(followup) if followup
         end
       end

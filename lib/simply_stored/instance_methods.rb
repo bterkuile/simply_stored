@@ -1,11 +1,9 @@
 module SimplyStored
   module InstanceMethods
-    
     def initialize(attributes = {}, &blk)
       super(_remove_protected_attributes(attributes))
       blk.call(self) if blk
     end
-    
     def ==(other)
       other.kind_of?(SimplyStored::Couch) && other._id == _id && other._rev == _rev
     end
@@ -67,11 +65,11 @@ module SimplyStored
         else
           return false
         end
-      else 
+      else
         save
       end
     end
-    
+
     def attributes=(attr)
       super(_remove_protected_attributes(attr))
     end
