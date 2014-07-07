@@ -1,20 +1,22 @@
 require 'rubygems'
-require 'test/unit'
+#require 'minitest'
+require "minitest/autorun"
+require "minitest-spec-context"
 require 'bundler/setup'
 require 'active_support/testing/assertions'
 require 'shoulda'
 require 'pry'
-require 'mocha'
+require 'mocha/setup'
 $:.unshift(File.expand_path(File.dirname(__FILE__) + "/../lib"))
 puts File.expand_path(File.dirname(__FILE__) + "/lib")
 require 'simply_stored'
 
-class Test::Unit::TestCase
+class MiniTest::Test
   include ActiveSupport::Testing::Assertions
-  
+
   def recreate_db
     CouchPotato.couchrest_database.delete! rescue nil
     CouchPotato.couchrest_database.server.create_db CouchPotato::Config.database_name
   end
-  
+
 end

@@ -20,7 +20,7 @@ class AncestryTest < Test::Unit::TestCase
     should "all have a path containing own id" do
       assert_equal @a.map(&:id), @a.map(&:path_ids).flatten
     end
-    
+
     should "set valid children when mass assigned" do
       @d1.children = [@d2, @d3]
       assert_equal [@d2.id, @d3.id].sort, @d1.children.map(&:id).sort
@@ -165,7 +165,7 @@ class AncestryTest < Test::Unit::TestCase
     should "all have a path containing own id" do
       assert_equal @a.map(&:id), @a.map(&:path_ids).flatten
     end
-    
+
     should "set valid children when mass assigned" do
       @d1.children = [@d2, @d3]
       assert_equal [@d2.id, @d3.id].sort, @d1.children.map(&:id).sort

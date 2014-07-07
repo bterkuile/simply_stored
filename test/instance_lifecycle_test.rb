@@ -7,7 +7,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
       CouchPotato::Config.database_name = 'simply_stored_test'
       recreate_db
     end
-    
+
     context "design documents" do
       should "delete all" do
         db = "http://127.0.0.1:5984/#{CouchPotato::Config.database_name}"
@@ -34,58 +34,58 @@ class InstanceLifecycleTest < Test::Unit::TestCase
         assert_equal "Mr.", user.title
         assert_equal "Host Master", user.name
       end
-      
+
       should "save the instance" do
         user = User.create(:title => "Mr.")
         assert !user.new_record?
       end
-      
+
       context "with a bang" do
         should 'not raise an exception when saving succeeded' do
           assert_nothing_raised do
             User.create!(:title => "Mr.")
           end
         end
-        
+
         should 'save the user' do
           user = User.create!(:title => "Mr.")
           assert !user.new_record?
         end
-        
+
         should 'raise an error when the validations failed' do
           assert_raises(CouchPotato::Database::ValidationsFailedError) do
             User.create!(:title => nil)
           end
         end
       end
-      
+
       context "with a block" do
         should 'call the block with the record' do
           user = User.create do |u|
             u.title = "Mr."
           end
-          
+
           assert_equal "Mr.", user.title
         end
-        
+
         should 'save the record' do
           user = User.create do |u|
             u.title = "Mr."
           end
           assert !user.new_record?
         end
-        
+
         should 'assign attributes via the hash' do
           user = User.create(:title => "Mr.") do |u|
             u.name = "Host Master"
           end
-          
+
           assert_equal "Mr.", user.title
           assert_equal "Host Master", user.name
         end
       end
     end
-    
+
     context "when saving an instance" do
       should "um, save the instance" do
         user = User.new(:title => "Mr.")
@@ -93,7 +93,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
         user.save
         assert !user.new_record?
       end
-      
+
       context "when using save!" do
         should 'raise an exception when a validation isnt fulfilled' do
           user = User.new
@@ -102,7 +102,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
           end
         end
       end
-      
+
       context "when using save(false)" do
         should "not run the validations" do
           user = User.new
@@ -112,7 +112,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
         end
       end
     end
-    
+
     context "when destroying an instance" do
       should "remove the instance" do
         user = User.create(:title => "Mr")
@@ -120,33 +120,33 @@ class InstanceLifecycleTest < Test::Unit::TestCase
           user.destroy
         end
       end
-      
+
       should 'return the frozen instance, brrrr' do
         user = User.create(:title => "Mr")
         assert_equal user, user.destroy
       end
     end
-    
+
     context "when updating attributes" do
       should "merge in the updated attributes" do
         user = User.create(:title => "Mr.")
         user.update_attributes(:title => "Mrs.")
         assert_equal "Mrs.", user.title
       end
-      
+
       should "save the instance" do
         user = User.create(:title => "Mr.")
         user.update_attributes(:title => "Mrs.")
         assert !user.dirty?
       end
     end
-    
-   
+
+
     context "when counting" do
       setup do
         recreate_db
       end
-      
+
       context "when counting all" do
         should "return the number of objects in the database" do
           CountMe.create(:title => "Mr.")
@@ -154,7 +154,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
           assert_equal 2, CountMe.find(:all).size
           assert_equal 2, CountMe.count
         end
-        
+
         should "only count the correct class" do
           CountMe.create(:title => "Mr.")
           DontCountMe.create(:title => 'Foo')
@@ -162,7 +162,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
           assert_equal 1, CountMe.count
         end
       end
-      
+
       context "when counting by prefix" do
         should "return the number of matching objects" do
           CountMe.create(:title => "Mr.")
@@ -170,7 +170,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
           assert_equal 1, CountMe.find_all_by_title('Mr.').size
           assert_equal 1, CountMe.count_by_title('Mr.')
         end
-        
+
         should "only count the correct class" do
           CountMe.create(:title => "Mr.")
           DontCountMe.create(:title => 'Mr.')
@@ -189,7 +189,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
         assert_equal "Mrs.", user.title
         assert_equal "Hostess Masteress", user.name
       end
-      
+
       should "remove attributes that are no longer in the database" do
         user = User.create(:title => "Mr.", :name => "Host Master")
         assert_not_nil user.name
@@ -198,7 +198,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
         same_user_in_different_thread.save!
         assert_nil user.reload.name
       end
-      
+
       should "also remove foreign key attributes that are no longer in the database" do
         user = User.create(:title => "Mr.", :name => "Host Master")
         post = Post.create(:user => user)
@@ -208,7 +208,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
         same_post_in_different_thread.save!
         assert_nil post.reload.user_id
       end
-      
+
       should "not be dirty after reloading" do
         user = User.create(:title => "Mr.", :name => "Host Master")
         user2 = User.find(user.id)
@@ -216,7 +216,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
         user.reload
         assert !user.dirty?, user.changes.inspect
       end
-      
+
       should "ensure that association caches for has_many are cleared" do
         user = User.create(:title => "Mr.", :name => "Host Master")
         post = Post.create(:user => user)
@@ -226,7 +226,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
         assert_nil user.instance_variable_get("@posts")
         assert_not_nil user.posts.first
       end
-      
+
       should "ensure that association caches for belongs_to are cleared" do
         user = User.create(:title => "Mr.", :name => "Host Master")
         post = Post.create(:user => user)
@@ -236,7 +236,7 @@ class InstanceLifecycleTest < Test::Unit::TestCase
         assert_nil post.instance_variable_get("@user")
         assert_not_nil post.user
       end
-      
+
       should "update the revision" do
         user = User.create(:title => "Mr.", :name => "Host Master")
         user2 = User.find(user.id)

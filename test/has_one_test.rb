@@ -7,7 +7,7 @@ class HasOneTest < Test::Unit::TestCase
       CouchPotato::Config.database_name = 'simply_stored_test'
       recreate_db
     end
-    
+
     should "add a getter method" do
       assert Instance.new.respond_to?(:identity)
     end
@@ -21,21 +21,21 @@ class HasOneTest < Test::Unit::TestCase
         end
       end
     end
-    
+
     should "fetch the object when invoking the getter" do
       instance = Instance.create
       identity = Identity.create(:instance => instance)
       assert_equal identity, instance.identity
     end
-    
+
     should "set the parent object on the clients cache" do
       Instance.expects(:find).never
       instance = Instance.create
       identity = Identity.create(:instance => instance)
-      
+
       assert_equal instance, instance.identity.instance      
     end
-    
+
     should "use the correct view when handling inheritance" do
       problem = Problem.create
       big_problem = BigProblem.create
@@ -44,14 +44,14 @@ class HasOneTest < Test::Unit::TestCase
       issue.update_attributes(:problem_id => nil, :big_problem_id => big_problem.id)
       assert_equal issue, big_problem.issue
     end
-    
+
     should "verify the given options for the accessor method" do
       instance = Instance.create
       assert_raise(ArgumentError) do
         instance.identity(:foo => :var)
       end
     end
-    
+
     should "verify the given options for the association defintion" do
       assert_raise(ArgumentError) do
         User.instance_eval do
@@ -59,14 +59,14 @@ class HasOneTest < Test::Unit::TestCase
         end
       end
     end
-    
+
     should "store the fetched object into the cache" do
       instance = Instance.create
       identity = Identity.create(:instance => instance)
       instance.identity
       assert_equal identity, instance.instance_variable_get("@identity")
     end
-    
+
     should "not fetch from the database when object is in cache" do
       instance = Instance.create
       identity = Identity.create(:instance => instance)
@@ -74,7 +74,7 @@ class HasOneTest < Test::Unit::TestCase
       CouchPotato.database.expects(:view).never
       instance.identity
     end
-    
+
     should "update the foreign object to have the owner's id in the forein key" do
       instance = Instance.create
       identity = Identity.create
@@ -82,7 +82,7 @@ class HasOneTest < Test::Unit::TestCase
       identity.reload
       assert_equal instance.id, identity.instance_id
     end
-    
+
     should "update the cache when setting" do
       instance = Instance.create
       identity = Identity.create
@@ -90,7 +90,7 @@ class HasOneTest < Test::Unit::TestCase
       CouchPotato.expects(:database).never
       assert_equal identity, instance.identity
     end
-    
+
     should "set the foreign key value to nil when assigning nil" do
       instance = Instance.create
       identity = Identity.create(:instance => instance)
@@ -98,14 +98,14 @@ class HasOneTest < Test::Unit::TestCase
       identity = Identity.find(identity.id)
       assert_nil identity.instance_id
     end
-    
+
     should 'check the class' do
       instance = Instance.create
       assert_raise(ArgumentError, 'expected Item got String') do
         instance.identity = 'foo'
       end
     end
-    
+
     should 'delete the dependent objects when dependent is set to destroy' do
       identity = Identity.create
       mag = Magazine.create
@@ -113,17 +113,17 @@ class HasOneTest < Test::Unit::TestCase
       mag.identity = nil
       assert_nil Identity.find_by_id(identity.id)
     end
-    
+
     should 'unset the id on the foreign object when a new object is set' do
       instance = Instance.create
       identity = Identity.create(:instance => instance)
       identity2 = Identity.create
-      
+
       instance.identity = identity2
       identity = Identity.find(identity.id)
       assert_nil identity.instance_id
     end
-    
+
     should 'delete the foreign object when a new object is set and dependent is set to destroy' do
       identity = Identity.create
       identity2 = Identity.create
@@ -132,16 +132,16 @@ class HasOneTest < Test::Unit::TestCase
       mag.identity = identity2
       assert_nil Identity.find_by_id(identity.id)
     end
-    
+
     should 'delete the foreign object when parent is destroyed and dependent is set to destroy' do
       identity = Identity.create
       mag = Magazine.create
       mag.identity = identity
-      
+
       mag.destroy
       assert_nil Identity.find_by_id(identity.id)
     end
-    
+
     should 'nullify the foreign objects foreign key when parent is destroyed' do
       identity = Identity.create
       instance = Instance.create

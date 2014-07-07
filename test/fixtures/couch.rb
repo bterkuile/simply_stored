@@ -1,23 +1,23 @@
 class User
   include SimplyStored::Couch
   validates_presence_of :title
-  
+
   property :name
   property :title
   property :homepage
-  
+
   has_many :posts
   has_many :strict_posts
   has_many :hemorrhoids
   has_many :pains, :through => :hemorrhoids
   has_many :docs, :class_name => "Document", :foreign_key => "editor_id"
-  
+
   view :by_name_and_created_at, :key => [:name, :created_at]
 end
 
 class Post
   include SimplyStored::Couch
-  
+
   belongs_to :user
   has_many_embedded :embedded_comments
 end
@@ -65,9 +65,9 @@ end
 
 class StrictPost
   include SimplyStored::Couch
-  
+
   belongs_to :user
-  
+
   validates_presence_of :user
   has_many :embedded_comments
 end
@@ -79,7 +79,7 @@ class Comment
   current_page_method 'current_page_modified'
   num_pages_method 'num_pages_modified'
   per_page_method 'per_page_modified'
-  
+
   belongs_to :user
   belongs_to :network
 end
@@ -90,20 +90,20 @@ class Category
   property :name
   property :alias
   property :parent
-  
+
   validates_inclusion_of :name, :in => ["food", "drinks", "party"], :allow_blank => true
 end
 
 class Document
   include SimplyStored::Couch
-  
+
   belongs_to :author, :class_name => "User"
   belongs_to :editor, :class_name => "User"
 end
 
 class Tag
   include SimplyStored::Couch
-  
+
   belongs_to :category
   property :name
 end
@@ -131,14 +131,14 @@ end
 
 class UniqueUser
   include SimplyStored::Couch
-  
+
   property :name
   validates_uniqueness_of :name
 end
 
 class UniqueUserWithAView
   include SimplyStored::Couch
-  
+
   view :by_name, :key => :email
   property :name
   validates_uniqueness_of :name
@@ -146,19 +146,19 @@ end
 
 class CountMe
   include SimplyStored::Couch
-  
+
   property :title
 end
 
 class DontCountMe
   include SimplyStored::Couch
-  
+
   property :title
 end
 
 class Journal
   include SimplyStored::Couch
-  
+
   has_many :memberships, :dependent => :destroy
   has_many :readers, :through => :memberships, :dependent => :destroy
   property :foo
@@ -166,14 +166,14 @@ end
 
 class Reader
   include SimplyStored::Couch
-  
+
   has_many :memberships, :dependent => :destroy
   has_many :journals, :through => :memberships
 end
 
 class Membership
   include SimplyStored::Couch
-  
+
   belongs_to :reader
   belongs_to :journal
 end
@@ -194,11 +194,11 @@ end
 
 class Hemorrhoid
   include SimplyStored::Couch
-  
+
   enable_soft_delete
-  
+
   view :by_nickname_and_size, :key => [:nickname, :size]
-  
+
   property :nickname
   property :size
   belongs_to :user
@@ -208,82 +208,82 @@ class Hemorrhoid
   has_many :easy_sub_hemorrhoids, :dependent => :destroy
   has_many :rashs, :dependent => :nullify
   has_many :small_rashs, :dependent => :nullify
-  
+
   before_destroy :before_destroy_callback
   after_destroy :after_destroy_callback
-  
+
   def before_destroy_callback
   end
-  
+
   def after_destroy_callback
   end
 end
 
 class SubHemorrhoid
   include SimplyStored::Couch
-  
+
   enable_soft_delete
-  
+
   belongs_to :hemorrhoid
 end
 
 class EasySubHemorrhoid
   include SimplyStored::Couch
-  
+
   belongs_to :hemorrhoid
 end
 
 class Rash
   include SimplyStored::Couch
-  
+
   belongs_to :hemorrhoid
 end
 
 class SmallRash
   include SimplyStored::Couch
-  
+
   enable_soft_delete
-  
+
   belongs_to :hemorrhoid
 end
 
 class Pain
   include SimplyStored::Couch
-  
+
   has_many :hemorrhoids
   has_many :users, :through => :hemorrhoids
 end
 
 class Spot
   include SimplyStored::Couch
-  
+
   has_one :hemorrhoid
 end
 
 class Master
   include SimplyStored::Couch
-  
+
   has_many :servants, :dependent => :ignore
 end
 
 class Servant
   include SimplyStored::Couch
-  
+
   belongs_to :master
 end
 
 class Issue
   include SimplyStored::Couch
-  
+
   belongs_to :problem
   belongs_to :big_problem
-  
+
   property :name
 end
 
 class Problem
   include SimplyStored::Couch
-  
+
   has_many :issues
   has_one :issue
 end
