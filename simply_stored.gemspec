@@ -54,7 +54,6 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.8.24}
   s.summary = %q{Convenience layer for CouchDB}
   s.test_files = [
-    "test/active_model_compatibility_test.rb",
      "test/belongs_to_test.rb",
      "test/conflict_handling_test.rb",
      "test/finder_test.rb",
