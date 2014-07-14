@@ -11,29 +11,29 @@ module SimplyStored
           base.constantize
         end
       end
-      
+
       def foreign_key
         name.underscore.gsub('/','__').gsub('::','__') + "_id"
       end
-      
+
       def foreign_property
         name.underscore.gsub('/','__').gsub('::','__')
       end
-      
+
       def attr_protected(*args)
         @_protected_attributes ||= []
         @_protected_attributes += args.to_a
       end
-      
+
       def attr_accessible(*args)
         @_accessible_attributes ||= []
         @_accessible_attributes += args.to_a
       end
-      
+
       def _find_property(name)
         properties.find{|property| property.name == name}
       end
-        
+
       # Namespace aware method of creating proper class names    
       def find_association_class_name(association_name)
         (name.split('::')[0..-2] + [association_name.to_s.singularize.camelize]).join('::')
@@ -43,6 +43,9 @@ module SimplyStored
       def primary_key
         'id'
       end
+
+      # Fix for paperclip > 3.5.2
+      def after_commit(*); end
 
       # Get documents by ids and bulk update attributes
       def bulk_update(ids, pairs)
