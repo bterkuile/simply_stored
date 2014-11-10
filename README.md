@@ -388,7 +388,7 @@ dir1.children = [dir1_1]
 dir1.add_child dir1_1
 ```
 
-### Bonus an example used together with the cmtool cms to build a zurb-foundation menu in slim:
+### Bonus an example used together with the [cmtool cms](https://github.com/bterkuile/cmtool) to build a [zurb-foundation](http://foundation.zurb.com/docs/components/topbar.html) menu in [slim](http://slim-lang.com/):
 ```slim
 .fixed: nav.top-bar.fixed data-topbar="" role="navigation"
   section.top-bar-section
