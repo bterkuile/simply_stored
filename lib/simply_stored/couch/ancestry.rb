@@ -19,7 +19,7 @@ module SimplyStored
           for child in @children
             for descendant in child.descendants
               @new_descendants << descendant
-            end 
+            end
           end
           @old_descendants.each{|d| d.instance_variable_set('@parent', nil); d.path_ids = [d.id]} # old descendants become root
           (@old_descendants - @new_descendants).map(&:save) # Persist old descendants not present in new descendants
@@ -169,14 +169,14 @@ module SimplyStored
 
       # Add ancestry logic to your model
       #   class Page
-      #     include SimplyStored::Couch 
+      #     include SimplyStored::Couch
       #     has_ancestry
       #   end
       # or
       #   class Page
-      #     include SimplyStored::Couch 
+      #     include SimplyStored::Couch
       #     property :locale
-      #     has_ancestry :by_property => :locale
+      #     has_ancestry by_property: :locale
       #   end
       def has_ancestry(options = {})
         @ancestry_by_property = nil
@@ -229,7 +229,7 @@ module SimplyStored
               root_key = options.delete(root_property)
               options[:startkey] = [root_key.to_s]
               options[:endkey] = [root_key.to_s, {}]
-            end 
+            end
           end
           options[:reduce] = false
           database.view(roots_view(options))
@@ -248,7 +248,7 @@ module SimplyStored
               records = send("find_all_by_#{root_property}", root_key.to_s)
             else
               records = options[:records].presence || all
-            end 
+            end
           else
             records = options.is_a?(Array) ? options : (options.present? && options[:records].presence) || all
           end
@@ -279,7 +279,7 @@ module SimplyStored
 
             # Initialize children if needed
             parent.instance_variable_set('@children', []) unless parent.instance_variable_get('@children').is_a?(Array)
-            
+
             # Avoid database call on deepest children
             page.instance_variable_set('@children', []) unless page.instance_variable_get('@children').is_a?(Array)
             parent.instance_variable_get('@children') << page
@@ -297,7 +297,7 @@ module SimplyStored
           for child in children.sort_by!(&:position)
             child.instance_variable_set('@parent', parent)
             child.update_tree_path
-            set_parent child, child.children 
+            set_parent child, child.children
           end
         end
       end
