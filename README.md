@@ -388,6 +388,17 @@ dir1.children = [dir1_1]
 dir1.add_child dir1_1
 ```
 
+### Scoping by other property
+When you want a different tree for a different language in your website, you might want to use ancesty as well. Different languages have different trees however. This is supported:
+```ruby
+class Page
+  include SimplyStored::Couch
+
+  has_ancestry by_property: :locale
+end
+```
+Now trees are scoped by the local column. The [cmtool cms](https://github.com/bterkuile/cmtool) makes use of this feature.
+
 ### Bonus an example used together with the [cmtool cms](https://github.com/bterkuile/cmtool) to build a [zurb-foundation](http://foundation.zurb.com/docs/components/topbar.html) menu in [slim](http://slim-lang.com/):
 ```slim
 .fixed: nav.top-bar.fixed data-topbar="" role="navigation"

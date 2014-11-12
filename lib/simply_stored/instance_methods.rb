@@ -69,6 +69,7 @@ module SimplyStored
         save
       end
     end
+    alias_method :update, :update_attributes
 
     def attributes=(attr)
       super(_remove_protected_attributes(attr))
