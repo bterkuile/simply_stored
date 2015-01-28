@@ -124,17 +124,17 @@ module SimplyStored
           if parent_id != val.presence
             @parent = nil
             @parent_id = val.presence
-            subtree
+            subtree if persisted?
             path_ids_will_change!
             if @parent_id
               @parent = parent
               self.path_ids = parent.path_ids + [id]
-              self.class.set_parent(self, @children)
+              self.class.set_parent(self, @children) if persisted?
             else
               self.path_ids = [id]
-              self.class.set_parent(self, @children)
+              self.class.set_parent(self, @children) if persisted?
             end
-            @descendants.map(&:save) if save
+            @descendants.map(&:save) if persisted? && save
           end
         end
 
