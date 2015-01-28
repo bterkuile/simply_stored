@@ -7,6 +7,7 @@ gem 'couch_potato', :git => 'git://github.com/bterkuile/couch_potato.git' #, '0.
 gem 'activesupport' #, '~> 3.0.7', :require => 'active_support'
 gem 'right_aws'
 group :test do
+  gem 'rspec'
   gem 'minitest', '~> 4', require: false
   gem 'minitest-spec-context'
   gem 'pry'

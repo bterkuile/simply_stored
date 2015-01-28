@@ -69,6 +69,7 @@ module SimplyStored
         # Get all descendants
         def descendants
           return @descendants if @descendants
+          return @descendants = [] if id.blank?
           if root_property = self.class.ancestry_by_property
             @descendants = self.class.database.view(self.class.subtree_view(:startkey => [send(root_property), id], :endkey => [send(root_property), id, {}], :reduce => false)).sort_by!{|d| [d.path_ids.size, d.position]}
           else
