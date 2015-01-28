@@ -5,13 +5,13 @@ require "minitest-spec-context"
 require 'bundler/setup'
 require 'active_support/testing/assertions'
 require 'shoulda'
+require 'test/unit'
 require 'pry'
 require 'mocha/setup'
 $:.unshift(File.expand_path(File.dirname(__FILE__) + "/../lib"))
 puts File.expand_path(File.dirname(__FILE__) + "/lib")
 require 'simply_stored'
-
-class MiniTest::Test
+class MiniTest::Unit::TestCase
   include ActiveSupport::Testing::Assertions
 
   def recreate_db
