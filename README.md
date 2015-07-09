@@ -1,4 +1,6 @@
 Convenience layer for CouchDB on top of CouchPotato.
+===================================================
+[![Build Status](https://travis-ci.org/bterkuile/simply_stored.svg?branch=master)](https://travis-ci.org/bterkuile/simply_stored)
 
 SimplyStored allows you to persist your objects to CouchDB using an ActiveRecord-like syntax.
 
@@ -13,7 +15,7 @@ by using an in-memory CouchDB backend.
 More examples on how to work with SimplyStored can be found [here](http://github.com/jweiss/simply_stored_examples)
 
 This fork
-============
+------------
 This fork of SimplyStored adds some extras to the standard version. A list of this is:
 
 * Pagination, use: Person.all(:page => params[:page], :per\_page => 40) out of the box
@@ -26,7 +28,7 @@ This fork of SimplyStored adds some extras to the standard version. A list of th
 * Moving towards ActiveModel, phasing out other/older libraries
 
 Installation
-============
+------------
 Add the following to your bundle file
     gem 'simply_stored', :git => 'git://github.com/bterkuile/simply_stored.git'
 
@@ -62,7 +64,7 @@ Add to your Gemfile:
 Please also see the installation info of [CouchPotato](https://github.com/langalex/couch_potato)
 
 Usage
-=============
+-------------
 
 Require SimplyStored:
 
@@ -72,7 +74,7 @@ Require SimplyStored:
 From now on you can define classes that use SimplyStored.
 
 Intro
-=============
+-------------
 
 SimplyStored auto-generates views for you and handles all the serialization and de-serialization stuff.
 
@@ -122,7 +124,7 @@ SimplyStored auto-generates views for you and handles all the serialization and 
 
 
 Associations
-=============
+-------------
 
 The supported associations are: belongs_to, has_one, has_many, has_many :through, and has_and_belongs_to_many:
 
@@ -201,7 +203,7 @@ The supported associations are: belongs_to, has_one, has_many, has_many :through
   the other part. Soft deleting is only supported on the class holding the IDs.  
 
 Custom Associations
-=============
+-------------
 
     class Document
       include SimplyStored::Couch
@@ -215,7 +217,7 @@ Custom Associations
 
 
 Validations
-=============
+-------------
 
 Validations are handled by ActiveModel, There are two exceptions:
 
@@ -239,7 +241,7 @@ Page.new(categories: %w[one four]).valid? #=> false
 ```
 
 S3 Attachments
-=============
+-------------
 
 SimplyStored supports storing large attachments in Amazon S3.
 It uses RightAWS for the interaction with the EC2 API:
@@ -268,7 +270,7 @@ This will create an item on S3 in the specified bucket. The item will use the ID
 
 
 Soft delete
-=============
+-------------
 
 SimplyStored also has support for "soft deleting" - much like acts_as_paranoid. Items will then not be deleted but only marked as deleted. This way you can recover them later.
 
@@ -328,7 +330,7 @@ other_client.title
 ```
 
 Ancestry
-========
+--------
 Ancestry is the ability to use tree formed structures.
 Since CouchDB is a map/reduce system, creating tree structures is a different technique than the ones apply
 by nested set like solution. Given the parent_id approach and many requests to the server always works, it is
@@ -417,11 +419,11 @@ having `app/views/application/_menu_item.html.slim`
       a href=page_path(menu_item.name) = menu_item.title.presence || menu_item.name
 ```
 License
-=============
+-------------
 
 SimplyStored is licensed under the OpenBSD / two-clause BSD license, modeled after the ISC license. See LICENSE.txt
 
 About
-=============
+-------------
 
 SimplyStored was written by [Mathias Meyer](http://twitter.com/roidrage) and [Jonathan Weiss](http://twitter.com/jweiss) for [Peritor](http://www.peritor.com).
