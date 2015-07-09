@@ -88,7 +88,7 @@ module SimplyStored
       reset_association_caches
       self
     end
-    
+
     def deleted?
       if self.class.soft_deleting_enabled?
         !send(self.class.soft_delete_attribute).nil?
@@ -174,7 +174,7 @@ module SimplyStored
         end
       end
     end
-    
+
     def _merge_possible?(our_attributes, their_attributes)
       _conflicting_attributes(our_attributes, their_attributes).empty?
     end
@@ -198,7 +198,7 @@ module SimplyStored
         end
       end
     end
-    
+
     def _remove_protected_attributes(attrs)
       return {} if attrs.blank?
       attrs = attrs.dup.stringify_keys
@@ -216,7 +216,7 @@ module SimplyStored
 
       attrs
     end
-    
+
     def check_and_destroy_dependents
       self.class.properties.each do |property|
         if property.respond_to?(:association?) and property.association?
@@ -233,11 +233,11 @@ module SimplyStored
                 dependent.destroy
               when :ignore
                 # skip
-              else 
+              else
                 # nullify
                 unless dependent.class.soft_deleting_enabled? && dependent.deleted?
                   foreign_property = self.class.foreign_property
-                  foreign_property_without_namespace = foreign_property.to_s.split('__').last 
+                  foreign_property_without_namespace = foreign_property.to_s.split('__').last
                   if dependent.respond_to?("#{foreign_property}=")
                     dependent.send("#{foreign_property}=", nil)
                   elsif dependent.respond_to?("#{foreign_property_without_namespace}=")
@@ -251,7 +251,7 @@ module SimplyStored
         end
       end
     end
-    
+
     def _default_view_options(options = {})
       view_options = {:include_docs => true, :reduce => false}
       view_options[:descending] = options[:descending] if options[:descending]
@@ -268,12 +268,12 @@ module SimplyStored
 
     def find_one_associated(from, to, options = {})
       options = {
-        :limit => 1, 
+        :limit => 1,
         :descending => true
       }.update(options)
       find_associated(from, to, options).first
     end
-    
+
     def find_associated(from, to, options = {})
       foreign_key = (options.delete(:foreign_key) || self.class.name.singularize.property_name.foreign_key).to_s.gsub(/_id$/, '')
       view_options = _default_view_options(options)
@@ -288,12 +288,12 @@ module SimplyStored
             "association_#{from.to_s.singularize.property_name}_belongs_to_#{foreign_key}", view_options))
       end
     end
-    
+
     def get_embedded(*args)
       puts args.inspect
       []
     end
-     
+
     def count_associated(from, to, options = {})
       view_options = _default_view_options(options)
       view_options[:reduce] = true
@@ -309,7 +309,7 @@ module SimplyStored
             "association_#{from.to_s.singularize.property_name}_belongs_to_#{to.name.singularize.property_name}", view_options))
       end
     end
-    
+
     def find_associated_via_join_view(from, to, options = {})
       foreign_key = options.delete(:foreign_key).to_s.gsub(/_ids$/, '').pluralize
       view_options = _default_view_options(options)
@@ -324,7 +324,7 @@ module SimplyStored
             "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}", view_options))
       end
     end
-    
+
     def count_associated_via_join_view(from, to, options = {})
       view_options = _default_view_options(options)
       view_options[:reduce] = true
@@ -342,11 +342,10 @@ module SimplyStored
     end
 
     def _mark_as_deleted
-      _run_destroy_callbacks do
+      run_callbacks :destroy do
         send("#{self.class.soft_delete_attribute}=", Time.now)
         save(false)
       end
     end
-    
   end
 end
