@@ -8,11 +8,14 @@ module SimplyStored
         if options && order = options.delete(:order)
           options[:descending] = true if order == :desc
         end
-        
+
         with_deleted = options.delete(:with_deleted)
-        
+
         result = case what
         when :all
+          if options.has_key?(:page)
+            options[:total_entries] = count
+          end
           if with_deleted || !soft_deleting_enabled?
             with_pagination_options(options) do |options|
               database.view(all_documents(options))
@@ -28,7 +31,7 @@ module SimplyStored
           else
             database.view(all_documents_without_deleted(options.update(:limit => 1, :include_docs => true))).first
           end
-        else          
+        else
           raise SimplyStored::Error, "Can't load record without an id" if what.nil?
           document = database.load_document(what, options)
           if what.is_a?(Array) # Support for multiple find
@@ -45,7 +48,7 @@ module SimplyStored
       def all(*args)
         find(:all, *args)
       end
-      
+
       def first(*args)
         find(:first, *args)
       end
@@ -58,7 +61,7 @@ module SimplyStored
       def count(options = {})
         options.assert_valid_keys(:with_deleted)
         with_deleted = options[:with_deleted]
-        
+
         if with_deleted || !soft_deleting_enabled?
           database.view(all_documents(:reduce => true))
         else
