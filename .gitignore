@@ -1,4 +1,5 @@
 Gemfile.lock
 *.swp
 *.gem
+.bundle
 README.html
