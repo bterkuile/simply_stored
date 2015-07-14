@@ -9,10 +9,10 @@ class User
   has_many :posts
   has_many :strict_posts
   has_many :hemorrhoids
-  has_many :pains, :through => :hemorrhoids
-  has_many :docs, :class_name => "Document", :foreign_key => "editor_id"
+  has_many :pains, through: :hemorrhoids
+  has_many :docs, class_name: "Document", foreign_key: "editor_id"
 
-  view :by_name_and_created_at, :key => [:name, :created_at]
+  view :by_name_and_created_at, key: [:name, :created_at]
 end
 
 class Post
@@ -34,7 +34,7 @@ class Page
 
   property :categories, type: Array
 
-  validates_containment_of :categories, :in => %w[one two three]
+  validates_containment_of :categories, in: %w[one two three]
 end
 
 class Directory
@@ -60,7 +60,7 @@ class NamespacedDirectory
   property :name
   property :locale
 
-  has_ancestry :by_property => :locale
+  has_ancestry by_property: :locale
 end
 
 class StrictPost
@@ -91,14 +91,14 @@ class Category
   property :alias
   property :parent
 
-  validates_inclusion_of :name, :in => ["food", "drinks", "party"], :allow_blank => true
+  validates_inclusion_of :name, in: ["food", "drinks", "party"], allow_blank: true
 end
 
 class Document
   include SimplyStored::Couch
 
-  belongs_to :author, :class_name => "User"
-  belongs_to :editor, :class_name => "User"
+  belongs_to :author, class_name: "User"
+  belongs_to :editor, class_name: "User"
 end
 
 class Tag
@@ -121,12 +121,12 @@ end
 
 class Magazine
   include SimplyStored::Couch
-  has_one :identity, :dependent => :destroy
+  has_one :identity, dependent: :destroy
 end
 
 class CouchLogItem
   include SimplyStored::Couch
-  has_s3_attachment :log_data, :bucket => "bucket-for-monsieur", :access_key => 'abcdef', :secret_access_key => 'secret!'
+  has_s3_attachment :log_data, bucket: "bucket-for-monsieur", access_key: 'abcdef', secret_access_key: 'secret!'
 end
 
 class UniqueUser
@@ -139,7 +139,7 @@ end
 class UniqueUserWithAView
   include SimplyStored::Couch
 
-  view :by_name, :key => :email
+  view :by_name, key: :email
   property :name
   validates_uniqueness_of :name
 end
@@ -159,16 +159,16 @@ end
 class Journal
   include SimplyStored::Couch
 
-  has_many :memberships, :dependent => :destroy
-  has_many :readers, :through => :memberships, :dependent => :destroy
+  has_many :memberships, dependent: :destroy
+  has_many :readers, through: :memberships, dependent: :destroy
   property :foo
 end
 
 class Reader
   include SimplyStored::Couch
 
-  has_many :memberships, :dependent => :destroy
-  has_many :journals, :through => :memberships
+  has_many :memberships, dependent: :destroy
+  has_many :journals, through: :memberships
 end
 
 class Membership
@@ -197,17 +197,17 @@ class Hemorrhoid
 
   enable_soft_delete
 
-  view :by_nickname_and_size, :key => [:nickname, :size]
+  view :by_nickname_and_size, key: [:nickname, :size]
 
   property :nickname
   property :size
   belongs_to :user
   belongs_to :pain
   belongs_to :spot
-  has_many :sub_hemorrhoids, :dependent => :destroy
-  has_many :easy_sub_hemorrhoids, :dependent => :destroy
-  has_many :rashs, :dependent => :nullify
-  has_many :small_rashs, :dependent => :nullify
+  has_many :sub_hemorrhoids, dependent: :destroy
+  has_many :easy_sub_hemorrhoids, dependent: :destroy
+  has_many :rashs, dependent: :nullify
+  has_many :small_rashs, dependent: :nullify
 
   before_destroy :before_destroy_callback
   after_destroy :after_destroy_callback
@@ -251,7 +251,7 @@ class Pain
   include SimplyStored::Couch
 
   has_many :hemorrhoids
-  has_many :users, :through => :hemorrhoids
+  has_many :users, through: :hemorrhoids
 end
 
 class Spot
@@ -263,7 +263,7 @@ end
 class Master
   include SimplyStored::Couch
 
-  has_many :servants, :dependent => :ignore
+  has_many :servants, dependent: :ignore
 end
 
 class Servant
@@ -297,9 +297,9 @@ class Server
 
   property :hostname
 
-  has_and_belongs_to_many :networks, :storing_keys => true
-  has_and_belongs_to_many :subnets, :storing_keys => true
-  has_and_belongs_to_many :ips, :storing_keys => false
+  has_and_belongs_to_many :networks, storing_keys: true
+  has_and_belongs_to_many :subnets, storing_keys: true
+  has_and_belongs_to_many :ips, storing_keys: false
 end
 
 class Network
@@ -307,18 +307,18 @@ class Network
 
   property :klass
 
-  has_and_belongs_to_many :servers, :storing_keys => false
-  has_and_belongs_to_many :routers, :storing_keys => false
+  has_and_belongs_to_many :servers, storing_keys: false
+  has_and_belongs_to_many :routers, storing_keys: false
 end
 
 class Subnet < Network
-  has_and_belongs_to_many :servers, :storing_keys => false
+  has_and_belongs_to_many :servers, storing_keys: false
 end
 
 class Ip
   include SimplyStored::Couch
 
-  has_and_belongs_to_many :servers, :storing_keys => true
+  has_and_belongs_to_many :servers, storing_keys: true
 end
 
 class Router
@@ -327,7 +327,7 @@ class Router
 
   property :hostname
 
-  has_and_belongs_to_many :networks, :storing_keys => true
+  has_and_belongs_to_many :networks, storing_keys: true
 end
 
 class Book
@@ -335,7 +335,7 @@ class Book
 
   property :title
 
-  has_and_belongs_to_many :authors, :storing_keys => true
+  has_and_belongs_to_many :authors, storing_keys: true
 end
 
 class Author
@@ -344,5 +344,5 @@ class Author
 
   property :name
 
-  has_and_belongs_to_many :books, :storing_keys => false
+  has_and_belongs_to_many :books, storing_keys: false
 end

@@ -347,8 +347,8 @@ class Directory
 end
 ```
 The `has_ancestry` adds two properties:
-* `path_ids`
-* `position` indicating the position in within the siblings
+* `path_ids` giving the ids of all the parents
+* `position` indicating the position within the siblings
 
 Do not edit these properties directly!
 
