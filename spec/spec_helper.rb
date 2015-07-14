@@ -7,6 +7,9 @@ require 'fixtures/couch'
 # :s/assert_equal \[\([^\]]\+\)\], \(.*\)/expect( \2 ).to eq [\1]
 
 RSpec.configure do |config|
+  config.expect_with(:rspec) { |c| c.syntax = [:expect, :should] }
+  config.color = true
+  config.tty = true
 
   config.before :suite do
     CouchPotato::Config.database_name = 'simply_stored_test'
