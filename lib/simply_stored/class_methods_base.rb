@@ -44,6 +44,12 @@ module SimplyStored
         'id'
       end
 
+      def view(view_name, options)
+        options[:reduce] = options.delete(:reduce_function) if options[:reduce_function]
+        options[:map] = options.delete(:map_function) if options[:map_function]
+        super(view_name, options)
+      end
+
       # Fix for paperclip > 3.5.2
       def after_commit(*); end
 

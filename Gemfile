@@ -3,7 +3,7 @@ gem "uuidtools"
 gem "activemodel"
 gem 'rest-client', require: 'restclient' #, '1.6.1', require: 'restclient'
 gem 'couchrest'#, '1.0.1'
-gem 'couch_potato', github: 'bterkuile/couch_potato' #, '0.2.31.2'
+gem 'couch_potato', '>= 1.4.0'#, github: 'bterkuile/couch_potato' #, '0.2.31.2'
 gem 'activesupport' #, '~> 3.0.7', require: 'active_support'
 gem 'right_aws'
 group :test do

@@ -33,7 +33,7 @@ module SimplyStored
           end
         else
           raise SimplyStored::Error, "Can't load record without an id" if what.nil?
-          document = database.load_document(what, options)
+          document = database.load_document(what)
           if what.is_a?(Array) # Support for multiple find
             #TODO: extended validation and checking, for array arguments
           else
