@@ -7,7 +7,7 @@ gem 'couch_potato', '>= 1.4.0'#, github: 'bterkuile/couch_potato' #, '0.2.31.2'
 gem 'activesupport' #, '~> 3.0.7', require: 'active_support'
 gem 'right_aws'
 group :test do
-  gem 'test-unit'
+  #gem 'test-unit'
   gem 'rspec'
   #gem 'minitest', '~> 4', require: false
   #gem 'minitest-spec-context'
