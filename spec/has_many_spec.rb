@@ -464,5 +464,13 @@ describe "HasMany" do
         @journal_1.delete
       end
     end
+
+    it "caches the parent relation" do
+      existing_user = User.create title: "User"
+      Post.create user: existing_user
+      Post.create user: existing_user
+      user = User.find(existing_user.id)
+      expect{ user.posts.each.map(&:user) }.not_to exceed_query_limit 1
+    end
   end
 end
