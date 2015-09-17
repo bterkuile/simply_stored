@@ -2,7 +2,6 @@ module CouchPotato
   module Persistence
     module DirtyAttributes
       private
-      
       def reset_dirty_attributes
         # active mode reset
         @previously_changed = changes
