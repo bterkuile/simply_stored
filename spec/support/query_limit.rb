@@ -22,7 +22,8 @@ RSpec::Matchers.define :exceed_query_limit do |expected|
   end
 
   failure_message_when_negated do |actual|
-    extra_queries = $performed_queries[expected..-1].map{|q| q[:url]}.map do |q|
+    #extra_queries = $performed_queries[expected..-1].map{|q| q[:url]}.map do |q|
+    extra_queries = $performed_queries.map{|q| q[:url]}.map do |q|
       if q =~ /5984\/\w+\/[0-9a-f]{32}$/
         info = q
         begin
@@ -37,7 +38,7 @@ RSpec::Matchers.define :exceed_query_limit do |expected|
         q
       end
     end
-    "Expected to run maximum #{expected} queries, got #{@executed_queries}\nExtra queries:\n - #{extra_queries.join("\n - ")}"
+    "Expected to run maximum #{expected} queries, got #{@executed_queries}\nqueries:\n - #{extra_queries.join("\n - ")}"
   end
 
   def query_count(&block)
