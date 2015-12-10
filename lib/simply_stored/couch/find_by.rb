@@ -22,12 +22,12 @@ module SimplyStored
 
         unless respond_to?(view_name)
           puts "Warning: Defining view #{self.name}##{view_name} with keys #{view_keys.inspect} at call time, please add it to the class body. (Called from #{caller[1]})"
-          view(view_name, :key => view_keys)
+          view(view_name, key: view_keys)
         end
 
         if !respond_to?(without_deleted_view_name) && soft_deleting_enabled?
           puts "Warning: Defining view #{self.name}##{without_deleted_view_name} with keys #{without_deleted_view_keys.inspect} at call time, please add it to the class body. (Called from #{caller[1]})"
-          view(without_deleted_view_name, :key => without_deleted_view_keys)
+          view(without_deleted_view_name, key: without_deleted_view_keys)
         end
         if raise_when_not_found
           (class << self; self end).instance_eval do
@@ -42,9 +42,9 @@ module SimplyStored
 
               if soft_deleting_enabled? && !with_deleted
                 key_args = key_args + [nil] # deleted_at
-                result = database.view(send(without_deleted_view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :limit => 1, :include_docs => true)).first
+                result = database.view(send(without_deleted_view_name, key: (key_args.size == 1 ? key_args.first : key_args), limit: 1, include_docs: true)).first
               else
-                result = database.view(send(view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :limit => 1, :include_docs => true)).first
+                result = database.view(send(view_name, key: (key_args.size == 1 ? key_args.first : key_args), limit: 1, include_docs: true)).first
               end
               raise SimplyStored::RecordNotFound unless result
               result
@@ -64,9 +64,9 @@ module SimplyStored
 
               if soft_deleting_enabled? && !with_deleted
                 key_args = key_args + [nil] # deleted_at
-                database.view(send(without_deleted_view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :limit => 1, :include_docs => true)).first
+                database.view(send(without_deleted_view_name, key: (key_args.size == 1 ? key_args.first : key_args), limit: 1, include_docs: true)).first
               else
-                database.view(send(view_name, :key => (key_args.size == 1 ? key_args.first : key_args), :limit => 1, :include_docs => true)).first
+                database.view(send(view_name, key: (key_args.size == 1 ? key_args.first : key_args), limit: 1, include_docs: true)).first
               end
             end
           end
@@ -94,19 +94,19 @@ module SimplyStored
 
         unless respond_to?(view_name)
           puts "Warning: Defining view #{self.name}##{view_name} with keys #{view_keys.inspect} at call time, please add it to the class body. (Called from #{caller[1]})"
-          view(view_name, :key => view_keys)
+          view(view_name, key: view_keys)
         end
 
         if !respond_to?(without_deleted_view_name) && soft_deleting_enabled?
           puts "Warning: Defining view #{self.name}##{without_deleted_view_name} with keys #{without_deleted_view_keys.inspect} at call time, please add it to the class body. (Called from #{caller[1]})"
-          view(without_deleted_view_name, :key => without_deleted_view_keys)
+          view(without_deleted_view_name, key: without_deleted_view_keys)
         end
 
         if raise_when_not_found
           (class << self; self end).instance_eval do
             define_method(:"#{name}!") do |*key_args|
               options = key_args.last.is_a?(Hash) ? key_args.pop : {}
-              with_pagination_options(options.update(:total_entries => send(count_name, *key_args))) do |options|
+              with_pagination_options(options.update(total_entries: send(count_name, *key_args))) do |options|
                 options.assert_valid_keys(:with_deleted, :limit, :skip, :keys)
                 with_deleted = options.delete(:with_deleted)
 
@@ -135,7 +135,7 @@ module SimplyStored
           (class << self; self end).instance_eval do
             define_method(name) do |*key_args|
               options = key_args.last.is_a?(Hash) ? key_args.pop : {}
-              with_pagination_options(options.update(:total_entries => send(count_name, *key_args))) do |options|
+              with_pagination_options(options.update(total_entries: send(count_name, *key_args))) do |options|
                 options.assert_valid_keys(:with_deleted, :limit, :skip, :keys)
                 with_deleted = options.delete(:with_deleted)
 
@@ -168,12 +168,12 @@ module SimplyStored
 
         unless respond_to?(view_name)
           puts "Warning: Defining view #{self.name}##{view_name} with keys #{view_keys.inspect} at call time, please add it to the class body. (Called from #{caller[1]})"
-          view(view_name, :key => view_keys)
+          view(view_name, key: view_keys)
         end
 
         if !respond_to?(without_deleted_view_name) && soft_deleting_enabled?
           puts "Warning: Defining view #{self.name}##{without_deleted_view_name} with keys #{without_deleted_view_keys.inspect} at call time, please add it to the class body. (Called from #{caller[1]})"
-          view(without_deleted_view_name, :key => without_deleted_view_keys)
+          view(without_deleted_view_name, key: without_deleted_view_keys)
         end
 
         (class << self; self end).instance_eval do
