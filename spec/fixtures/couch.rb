@@ -20,6 +20,7 @@ class Post
 
   belongs_to :user
   has_many_embedded :embedded_comments
+  view :by_user_id, key: :user_id
 end
 
 class EmbeddedComment

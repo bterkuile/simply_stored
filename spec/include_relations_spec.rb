@@ -28,13 +28,16 @@ describe "Include relation, aggregate many queries to one simplified one for per
   end
 
   context '...' do
-    it "sets the reverse relation on has many" do
+    it "includes has_many relations and sets the reverse relation on has many" do
       user1 = User.create title: "User1"
       user2 = User.create title: "User2"
       Post.create user: user1
+      Post.create user: user1
       Post.create user: user2
-      users = User.all.include_relation(:posts)
-      expect{ users.map(&:posts).flatten.map(&:user) }.not_to perform_any_queries
+      Post.create user: user2
+      users = nil
+      expect{ users = User.all.include_relation(:posts) }.not_to exceed_query_limit 2 # users.all and adding posts to both users
+      expect{ users.map(&:posts).flatten.map(&:user) }.not_to perform_any_queries # reverse relation user must be set on each post
     end
   end
 end
