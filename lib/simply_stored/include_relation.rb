@@ -63,7 +63,7 @@ class Array
         other_property = other_class.properties.find{|p| p.is_a?(SimplyStored::Couch::BelongsTo::Property) && p.options[:class_name] == klass.name}
         #TODO riase when soft_delete is enabled
         view_name = "by_#{other_property.name}_id"
-        raise "Cannot include has_many relation #{other_class.name.underscore.pluralize} on #{klass.name} when view #{view_name} with key #{other_property.name}_id is not defined" unless other_class.views[view_name].present?
+        raise "Cannot include has_many relation #{other_class.name.underscore.pluralize} on #{klass.name} when view #{view_name} with key #{other_property.name}_id is not defined on #{other_class.name}" unless other_class.views[view_name].present?
         relation_objects = other_class.database.view(other_class.send(view_name, keys: collect(&:id))) #not working yet
         relation_objects.include_relation(followup) if followup
 
