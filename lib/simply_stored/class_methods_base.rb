@@ -34,7 +34,7 @@ module SimplyStored
         properties.find{|property| property.name == name}
       end
 
-      # Namespace aware method of creating proper class names    
+      # Namespace aware method of creating proper class names
       def find_association_class_name(association_name)
         (name.split('::')[0..-2] + [association_name.to_s.singularize.camelize]).join('::')
       end

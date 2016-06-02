@@ -18,7 +18,7 @@
 #   @persons.each{ |person| person.posts.each{ |post| post.comments.each{ |comment| puts person.group.name + comment.writer.name } } }
 # This will result in 40 * 5 * 10 + 40 = 2040 queries to the database. Doing exactly the same thing using this script
 # will look like:
-#   @persons = Person.all.include_relation( :group, :posts => { :conmments => :writer } )
+#   @persons = Person.all.include_relation( :group, posts: { conmments: :writer } )
 # The useless script above will not take 2040 queries but:
 #   1 (persons) + 1 (group) + 1 (posts) + 1 (comments) + 1 (write) = 5 queries
 # This makes a difference.
@@ -61,14 +61,14 @@ class Array
       when SimplyStored::Couch::HasMany::Property then
         other_class = property.options[:class_name].constantize
         other_property = other_class.properties.find{|p| p.is_a?(SimplyStored::Couch::BelongsTo::Property) && p.options[:class_name] == klass.name}
-        relation_objects = other_class.send("find_all_by_#{other_property.name}_id", :keys => collect(&:id)) #not working yet
+        relation_objects = other_class.send("find_all_by_#{other_property.name}_id", keys: collect(&:id)) #not working yet
         relation_objects.include_relation(followup) if followup
 
         for obj in self
           found_relation_objects = relation_objects.select{|r| r.send("#{other_property.name}_id") == obj.id}
 
           # Make sure every object has a cached value, no more loading is done
-          obj.instance_variable_set("@#{relation}", {:all => []}) unless obj.instance_variable_get("@#{relation}").try('[]', :all)
+          obj.instance_variable_set("@#{relation}", {all: []}) unless obj.instance_variable_get("@#{relation}").try('[]', :all)
           if found_relation_objects.any?
             obj.instance_variable_get("@#{relation}")[:all] |= found_relation_objects
             if reverse_property_name = other_class.properties.find{|p| p.is_a?(SimplyStored::Couch::BelongsTo::Property) && p.options[:class_name] == klass.name }.try(:name)
