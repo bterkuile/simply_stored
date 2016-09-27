@@ -118,12 +118,12 @@ module SimplyStored
       begin
         _reset_conflict_information
         blk.call
-      rescue RestClient::Exception, RestClient::Conflict => e
-        if (e.http_code == 409 || e.is_a?(RestClient::Conflict)) && self.class.auto_conflict_resolution_on_save && retry_count < max_retries && try_to_merge_conflict
+      rescue CouchPotato::Conflict => e
+        if self.class.auto_conflict_resolution_on_save && retry_count < max_retries && try_to_merge_conflict
           retry_count += 1
           retry
         else
-          _decorate_with_conflict_details(e) if e.is_a?(RestClient::Conflict)
+          _decorate_with_conflict_details(e) if e.is_a?(CouchPotato::Conflict)
           raise e
         end
       end
