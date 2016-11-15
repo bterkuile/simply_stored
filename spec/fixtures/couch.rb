@@ -182,13 +182,21 @@ end
 class Callbacker
   include SimplyStored::Couch
   property :name
+  property :raise_on_save, type: :boolean, default: false
+  property :with_validation_error, type: :boolean, default: false
+  property :counter, type: Fixnum, default: 0
+
+  before_save ->{ self.counter += 1 }
 
   after_save :raise_error_after_save
+  before_validation_on_save do
+    errors.add(:base, :oops) if with_validation_error
+  end
 
   private
 
   def raise_error_after_save
-    raise StandardError
+    raise "save is called and expected to to raise" if raise_on_save
   end
 
 end
