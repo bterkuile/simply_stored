@@ -10,7 +10,7 @@ module SimplyStored
         self.name.property_name.pluralize
 
         map_definition_without_deleted = <<-eos
-          function(doc) { 
+          function(doc) {
             if (doc['ruby_class'] == '#{parent}') {
               if(typeof(doc['']))
               if (doc['#{soft_delete_attribute}'] && doc['#{soft_delete_attribute}'] != null){
@@ -21,35 +21,35 @@ module SimplyStored
             }
           }
         eos
-        
+
         reduce_definition = "_sum"
-         
+
         view "association_#{self.name.underscore.gsub('/', '__')}_embedded_in_#{name}",
           :map_function => map_definition_without_deleted,
           :reduce_function => reduce_definition,
           :type => :custom,
           :include_docs => true
-          
+
         map_definition_with_deleted = <<-eos
-          function(doc) { 
+          function(doc) {
             if (doc['ruby_class'] == '#{self.to_s}' && doc['#{name.to_s}_id'] != null) {
               emit([doc.#{name.to_s}_id, doc.created_at], 1);
             }
           }
         eos
-         
+
         view "association_#{self.name.underscore.gsub('/', '__')}_embedded_in_#{name}_with_deleted",
           :map_function => map_definition_with_deleted,
           :reduce_function => reduce_definition,
           :type => :custom,
           :include_docs => true
-            
+
         properties << SimplyStored::Couch::EmbeddedIn::Property.new(self, name, options)
       end
 
       class Property #:nodoc:
         attr_accessor :name, :options
-      
+
         def initialize(owner_clazz, name, options = {})
           @name = name
           embedded_in_name = name
@@ -122,7 +122,7 @@ module SimplyStored
               }
             }|, :results_filter => lambda{|results| results['rows'].map{|row| d = row['value']; d.parent_object = row['doc']; d.parent_object.send(parent_property_name)[d.index]}}
 
-            
+
 
             # For now empty merge. Since value of map function is transformed to object
             define_method :merge do |*args|
@@ -151,7 +151,7 @@ module SimplyStored
               with_deleted = local_options[:with_deleted] || false
               return parent_object
             end
-          
+
             define_method "#{name}=" do |value|
               return value if instance_variable_get("@#{name}") == value
               klass = self.class.get_class_from_name(name)
@@ -182,12 +182,12 @@ module SimplyStored
         def build(object, json)
           object.send "#{name}_id=", json["#{name}_id"]
         end
-      
+
         def serialize(json, object)
           json["#{name}_id"] = object.send("#{name}_id") if object.send("#{name}_id")
         end
         alias :value :serialize
-            
+
         def association?
           true
         end

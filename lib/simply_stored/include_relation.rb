@@ -33,6 +33,10 @@ class Array
   def include_relation(*relations_arg)
     return self if empty?
     relations = {}
+    database = nil
+    database = relations_arg.last.delete(:database) if relations_arg.last.is_a?(Hash) and relations_arg.last.has_key?(:database)
+    database ||= CouchPotato.database
+
     # Make sure relations is has, process up to two levels for recursion
     # keys with value nil will not have a followup
     relations_arg.each do |arg|
@@ -89,7 +93,7 @@ class Array
         end
 
         # Get from the database
-        relation_objects = CouchPotato.database.couchrest_database.bulk_load(keys.compact.uniq)
+        relation_objects = database.couchrest_database.bulk_load(keys.compact.uniq)
         relation_objects = Array.wrap(relation_objects['rows']).map{|r| r['doc']}.compact if relation_objects.is_a?(Hash)
         relation_objects ||= [] # Ensure array datatype
         relation_objects.include_relation(followup) if followup
@@ -111,7 +115,7 @@ class Array
           relation_ids = relation_ids.flatten.compact.uniq
 
           # Get from the database
-          relation_objects = CouchPotato.database.couchrest_database.bulk_load(relation_ids)
+          relation_objects = database.couchrest_database.bulk_load(relation_ids)
           relation_objects = Array.wrap(relation_objects['rows']).map{|r| r['doc']}.compact if relation_objects.is_a?(Hash)
           relation_objects ||= [] # Ensure array datatype
           each do |obj|

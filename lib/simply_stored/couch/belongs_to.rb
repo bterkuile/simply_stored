@@ -23,7 +23,7 @@ module SimplyStored
                                end
 
         map_definition_without_deleted = <<-eos
-          function(doc) { 
+          function(doc) {
             if (doc['ruby_class'] == '#{self.to_s}' && doc['#{name}_id'] != null) {
               if (doc['#{soft_delete_attribute}'] && doc['#{soft_delete_attribute}'] != null){
                 // "soft" deleted
@@ -33,34 +33,34 @@ module SimplyStored
             }
           }
         eos
-        
+
         reduce_definition = "_sum"
         view "association_#{foreign_property}_belongs_to_#{association_property}",
           :map_function => map_definition_without_deleted,
           :reduce_function => reduce_definition,
           :type => :custom,
           :include_docs => true
-          
+
         map_definition_with_deleted = <<-eos
-          function(doc) { 
+          function(doc) {
             if (doc['ruby_class'] == '#{self.to_s}' && doc['#{name}_id'] != null) {
               emit([doc.#{name}_id, doc.created_at], 1);
             }
           }
         eos
-         
+
         view "association_#{foreign_property}_belongs_to_#{association_property}_with_deleted",
           :map_function => map_definition_with_deleted,
           :reduce_function => reduce_definition,
           :type => :custom,
           :include_docs => true
-            
+
         properties << SimplyStored::Couch::BelongsTo::Property.new(self, name, options)
       end
 
       class Property #:nodoc:
         attr_accessor :name, :options
-      
+
         def initialize(owner_clazz, name, options = {})
           @name = name
           @options = {
@@ -71,13 +71,13 @@ module SimplyStored
 
           owner_clazz.class_eval do
             property :"#{name}_id"
-            
+
             define_method name do |*args|
               local_options = args.last.is_a?(Hash) ? args.last : {}
               local_options.assert_valid_keys(:force_reload, :with_deleted)
               forced_reload = local_options[:force_reload] || false
               with_deleted = local_options[:with_deleted] || false
-              
+
               return instance_variable_get("@#{name}") unless instance_variable_get("@#{name}").nil? or forced_reload
 
               if send("#{name}_id").present?
@@ -89,7 +89,7 @@ module SimplyStored
                 instance_variable_set("@#{name}",  nil)
               end
             end
-          
+
             define_method "#{name}=" do |value|
               klass = self.class.get_class_from_name(name)
               raise ArgumentError, "expected #{klass} got #{value.class}" unless value.nil? || value.is_a?(klass)
@@ -125,7 +125,7 @@ module SimplyStored
         def build(object, json)
           object.send "#{name}_id=", json["#{name}_id"]
         end
-      
+
         def serialize(json, object)
           json["#{name}_id"] = object.send("#{name}_id") if object.send("#{name}_id")
         end
