@@ -3,8 +3,8 @@
 # implementations. I will illustrate this given the example relation types:
 #   Person has_many posts and belongs to a group, Post has many comments, Comment belongs to Writer
 # If for a reason you have one page where you want to display all of these objects
-# (Person, Post, Comment) you can ofcourse create a view returning all these 
-# objects with a smart key for some handy selection. This will probably end up 
+# (Person, Post, Comment) you can ofcourse create a view returning all these
+# objects with a smart key for some handy selection. This will probably end up
 # in a controller implementation:
 #   @persons = view_result.select{|r| r.is_a?(Person)}
 #   @posts = view_result.select{|r| r.is_a?(Post)}
@@ -13,7 +13,7 @@
 # This probably is the recommended way of solving problems in most cases, but sometimes
 # because you are lazy or some other obscure reason, you want to use the standard
 # SimplyStored behaviour, but not wait too long. For example, if I have a list of 40 persons,
-# all having 5 posts that all have 10 comments belonging to a writer, getting all these 
+# all having 5 posts that all have 10 comments belonging to a writer, getting all these
 # through their standard relations:
 #   @persons.each{ |person| person.posts.each{ |post| post.comments.each{ |comment| puts person.group.name + comment.writer.name } } }
 # This will result in 40 * 5 * 10 + 40 = 2040 queries to the database. Doing exactly the same thing using this script
@@ -69,7 +69,14 @@ class Array
         view_name = "by_#{other_property.name}_id"
         raise "Cannot include has_many relation #{other_class.name.underscore.pluralize} on #{klass.name} when view :#{view_name}, key: :#{other_property.name}_id is not defined on #{other_class.name}" unless other_class.views[view_name].present?
         relation_objects = other_class.database.view(other_class.send(view_name, keys: collect(&:id))) #not working yet
-        relation_objects.include_relation(followup) if followup
+        if followup # deeper nested including
+          case followup
+          when Hash
+            then relation_objects.include_relation(followup.merge(database: database))
+          else
+            relation_objects.include_relation(*(Array.wrap(followup) + [{database: database}]))
+          end
+        end
 
         for obj in self
           found_relation_objects = relation_objects.select{|r| r.send("#{other_property.name}_id") == obj.id}
@@ -96,7 +103,14 @@ class Array
         relation_objects = database.couchrest_database.bulk_load(keys.compact.uniq)
         relation_objects = Array.wrap(relation_objects['rows']).map{|r| r['doc']}.compact if relation_objects.is_a?(Hash)
         relation_objects ||= [] # Ensure array datatype
-        relation_objects.include_relation(followup) if followup
+        if followup # deeper nested including
+          case followup
+          when Hash
+            then relation_objects.include_relation(followup.merge(database: database))
+          else
+            relation_objects.include_relation(*(Array.wrap(followup) + [{database: database}]))
+          end
+        end
 
         # Set to attributes
         each do |obj|
@@ -121,7 +135,14 @@ class Array
           each do |obj|
             obj.instance_variable_set("@#{relation}", {all: relation_objects.select{|o| Array.wrap(obj.send(key)).include?(o.id)}})
           end
-          relation_objects.include_relation(followup) if followup
+          if followup # deeper nested including
+            case followup
+            when Hash
+              then relation_objects.include_relation(followup.merge(database: database))
+            else
+              relation_objects.include_relation(*(Array.wrap(followup) + [{database: database}]))
+            end
+          end
         end
       end
     end
