@@ -97,6 +97,10 @@ module SimplyStored
       end
     end
 
+    def serializable_hash
+      {'id' => self.id}.merge attributes
+    end
+
   protected
 
     def retry_on_connection_error(max_retries = 2, &blk)
