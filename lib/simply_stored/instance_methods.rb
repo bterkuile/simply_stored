@@ -97,7 +97,7 @@ module SimplyStored
       end
     end
 
-    def serializable_hash
+    def serializable_hash(*)
       {'id' => self.id}.merge attributes
     end
 
