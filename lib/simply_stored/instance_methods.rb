@@ -21,7 +21,7 @@ module SimplyStored
       end
       # ActiveModel implementations
       @previously_changed = changes
-      @changed_attributes.clear
+      #@changed_attributes.clear
       return result
     end
 
@@ -33,7 +33,7 @@ module SimplyStored
       end
       # ActiveModel implementations
       @previously_changed = changes
-      @changed_attributes.clear
+      #@changed_attributes.clear
       return result
     end
 

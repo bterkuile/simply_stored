@@ -5,7 +5,7 @@ module CouchPotato
       def reset_dirty_attributes
         # active mode reset
         @previously_changed = changes
-        @changed_attributes.clear
+        #@changed_attributes.clear
         @forced_dirty = nil
 
         # belongs_to properties reset
