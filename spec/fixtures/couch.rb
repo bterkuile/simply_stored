@@ -184,7 +184,7 @@ class Callbacker
   property :name
   property :raise_on_save, type: :boolean, default: false
   property :with_validation_error, type: :boolean, default: false
-  property :counter, type: Fixnum, default: 0
+  property :counter, type: Integer, default: 0
 
   before_save ->{ self.counter += 1 }
 

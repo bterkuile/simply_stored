@@ -37,7 +37,7 @@ class Array
     database = relations_arg.last.delete(:database) if relations_arg.last.is_a?(Hash) and relations_arg.last.has_key?(:database)
     database ||= CouchPotato.database
 
-    # Make sure relations is has, process up to two levels for recursion
+    # Make sure relations is a Hash, process up to two levels for recursion
     # keys with value nil will not have a followup
     relations_arg.each do |arg|
       if arg.is_a?(Symbol)
@@ -60,7 +60,10 @@ class Array
 
     relations.each do |relation, followup|
       property = klass.properties.find{|p| p.name == relation}
-      next unless property
+      unless property
+        warn "Attempt to include_relations #{relation} on #{klass.name} but does not have supporting relation", uplevel: 1
+        next
+      end
       case property
       when SimplyStored::Couch::HasMany::Property then
         other_class = property.options[:class_name].constantize

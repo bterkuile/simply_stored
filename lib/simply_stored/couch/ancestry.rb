@@ -5,9 +5,9 @@ module SimplyStored
         def children
           return @children if @children
           if root_property = self.class.ancestry_by_property
-            @children = self.class.database.view(self.class.children_view(:startkey => [send(root_property), id], :endkey => [send(root_property), id, {}], :reduce => false))
+            @children = self.class.database.view(self.class.children_view(startkey: [send(root_property), id], endkey: [send(root_property), id, {}], reduce: false))
           else
-            @children = self.class.database.view(self.class.children_view(:startkey => [id], :endkey => [id, {}], :reduce => false))
+            @children = self.class.database.view(self.class.children_view(startkey: [id], endkey: [id, {}], reduce: false))
           end
           @children
         end
@@ -71,9 +71,9 @@ module SimplyStored
           return @descendants if @descendants
           return @descendants = [] if id.blank?
           if root_property = self.class.ancestry_by_property
-            @descendants = self.class.database.view(self.class.subtree_view(:startkey => [send(root_property), id], :endkey => [send(root_property), id, {}], :reduce => false)).sort_by!{|d| [d.path_ids.size, d.position]}
+            @descendants = self.class.database.view(self.class.subtree_view(startkey: [send(root_property), id], endkey: [send(root_property), id, {}], reduce: false)).sort_by!{|d| [d.path_ids.size, d.position]}
           else
-            @descendants = self.class.database.view(self.class.subtree_view(:startkey => [id], :endkey => [id, {}], :reduce => false)).sort_by{|d| [d.path_ids.size, d.position]}
+            @descendants = self.class.database.view(self.class.subtree_view(startkey: [id], endkey: [id, {}], reduce: false)).sort_by{|d| [d.path_ids.size, d.position]}
           end
           @children = self.class.build_tree(@descendants)
           @descendants
@@ -184,34 +184,34 @@ module SimplyStored
         def self.ancestry_by_property
           @ancestry_by_property
         end
-        options = {:order_by => :position}.merge(options)
+        options = {order_by: :position}.merge(options)
         order_by = case options[:order_by]
                    when Symbol then "doc['#{options[:order_by]}']"
                    when Array then "[#{options[:order_by].map{|o| "doc['#{o}']"}.join(', ')}]"
                    else "doc['position']"
                    end
-        property :path_ids, :type => Array, :default => []
-        property :position, :type => Fixnum, :default => 0
+        property :path_ids, type: Array, default: []
+        property :position, type: Integer, default: 0
         if options[:by_property].present?
           property options[:by_property] unless property_names.include?(options[:by_property])
           @ancestry_by_property = options[:by_property]
           by_property_view_prefix = options[:by_property].present? ? "doc['#{options[:by_property]}'], " : ''
         end
 
-        view :subtree_view, :type => :custom, :include_docs => true, :map_function => %|function(doc){
+        view :subtree_view, type: :custom, include_docs: true, map_function: %|function(doc){
           if(doc['ruby_class'] == '#{name}' && doc.path_ids){
             for(var i = 0; i < doc.path_ids.length - 1; i++){
               emit([#{by_property_view_prefix}doc.path_ids[i], #{order_by}], 1);
             }
           }
-        }|, :reduce_function => "_sum"
+        }|, reduce_function: "_sum"
 
-        view :children_view, :type => :custom, :include_docs => true, :map_function => %|function(doc){
+        view :children_view, type: :custom, include_docs: true, map_function: %|function(doc){
           if(doc['ruby_class'] == '#{name}' && doc.path_ids){
             emit([#{by_property_view_prefix}doc.path_ids.slice(-2,-1)[0], #{order_by}], 1);
           }
-        }|, :reduce_function => "_sum"
-        view :roots_view, :conditions => "doc.path_ids && doc.path_ids.length == 1", :key => [options[:by_property].presence, options[:order_by]].compact
+        }|, reduce_function: "_sum"
+        view :roots_view, conditions: "doc.path_ids && doc.path_ids.length == 1", key: [options[:by_property].presence, options[:order_by]].compact
         include SimplyStored::Couch::Ancestry::InstanceMethods
         extend SimplyStored::Couch::Ancestry::ClassMethods
         before_update :update_tree_path
@@ -223,9 +223,9 @@ module SimplyStored
             if options.blank?
               options = {}
             elsif options.is_a?(Symbol)
-              options = {:startkey => [options.to_s], :endkey => [options.to_s, {}]}
+              options = {startkey: [options.to_s], endkey: [options.to_s, {}]}
             elsif options.is_a?(String)
-              options = {:startkey => [options], :endkey => [options, {}]}
+              options = {startkey: [options], endkey: [options, {}]}
             elsif options.keys.include?(root_property)
               root_key = options.delete(root_property)
               options[:startkey] = [root_key.to_s]
@@ -260,7 +260,7 @@ module SimplyStored
         def build_tree(pages = nil)
           pages ||= all
           return pages if pages.empty? # Do not process empty array
-          @tree_wrapper = OpenStruct.new(:children => []) # Dummy container as traversing begin, contains roots as children
+          @tree_wrapper = OpenStruct.new(children: []) # Dummy container as traversing begin, contains roots as children
           old_tree_slice = @tree_wrapper.children
           new_tree_slice = []
           pages.sort_by!{|p| [p.path_ids.size, p.position]}
