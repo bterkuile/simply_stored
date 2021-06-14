@@ -36,30 +36,34 @@ Add the following to your bundle file
 
 Create a config/couchdb.yml:
 
-    default: &default
-      validation_framework: :active_model # optional
-      split_design_documents_per_view: true # optional
+```yml
+default: &default
+  validation_framework: :active_model # optional
+  split_design_documents_per_view: true # optional
 
-    development:
-      <<: *default
-      database: http://localhost:5984/development_db
-    test:
-      <<: *default
-      database: http://localhost:5984/test_db
-    production:
-      <<: *default
-      database: <%= ENV['DB_NAME'] %>
+development:
+  <<: *default
+  database: http://localhost:5984/development_db
+test:
+  <<: *default
+  database: http://localhost:5984/test_db
+production:
+  <<: *default
+  database: <%= ENV['DB_NAME'] %>
+```
 
 #### Rails 3.1.x
 
 Add to your Gemfile:
 
-    # gem 'rails' # we don't want to load activerecord so we can't require rails
-    gem 'railties'
-    gem 'actionpack'
-    gem 'actionmailer'
-    gem 'activemodel'
-    gem 'simply_stored', :require => 'simply_stored/couch'
+```ruby
+# gem 'rails' # we don't want to load activerecord so we can't require rails
+gem 'railties'
+gem 'actionpack'
+gem 'actionmailer'
+gem 'activemodel'
+gem 'simply_stored', :require => 'simply_stored/couch'
+```
 
 Please also see the installation info of [CouchPotato](https://github.com/langalex/couch_potato)
 
@@ -68,8 +72,10 @@ Usage
 
 Require SimplyStored:
 
-    require 'simply_stored'
-    CouchPotato::Config.database_name = "http://example.com:5984/name_of_the_db"
+```ruby
+require 'simply_stored'
+CouchPotato::Config.database_name = "http://example.com:5984/name_of_the_db"
+```
 
 From now on you can define classes that use SimplyStored.
 
@@ -78,50 +84,51 @@ Intro
 
 SimplyStored auto-generates views for you and handles all the serialization and de-serialization stuff.
 
-    class User
-      include SimplyStored::Couch
+```ruby
+class User
+  include SimplyStored::Couch
 
-      property :login
-      property :age
-      property :accepted_terms_of_service, :type => :boolean
-      property :last_login, :type => Time
-    end
+  property :login
+  property :age
+  property :accepted_terms_of_service, :type => :boolean
+  property :last_login, :type => Time
+end
 
-    user = User.new(:login => 'Bert', :age => 12, :accepted_terms_of_service => true, :last_login = Time.now)
-    user.save
+user = User.new(:login => 'Bert', :age => 12, :accepted_terms_of_service => true, :last_login = Time.now)
+user.save
 
-    User.find_by_age(12).login
-    # => 'Bert'
+User.find_by_age(12).login
+# => 'Bert'
 
-    User.all
-    # => [user]
+User.all
+# => [user]
 
-    class Post
-      include SimplyStored::Couch
+class Post
+  include SimplyStored::Couch
 
-      property :title
-      property :body
+  property :title
+  property :body
 
-      belongs_to :user
-    end
+  belongs_to :user
+end
 
-    class User
-      has_many :posts
-    end
+class User
+  has_many :posts
+end
 
-    post = Post.create(:title => 'My first post', :body => 'SimplyStored is so nice!', :user => user)
+post = Post.create(:title => 'My first post', :body => 'SimplyStored is so nice!', :user => user)
 
-    user.posts
-    # => [post]
+user.posts
+# => [post]
 
-    Post.find_all_by_title_and_user_id('My first post', user.id).first.body
-    # => 'SimplyStored is so nice!'
+Post.find_all_by_title_and_user_id('My first post', user.id).first.body
+# => 'SimplyStored is so nice!'
 
-    post.destroy
+post.destroy
 
-    user.posts(:force_reload => true)
-    # => []
-
+user.posts(:force_reload => true)
+# => []
+```
 
 Associations
 -------------
