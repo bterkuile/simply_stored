@@ -22,20 +22,21 @@ module SimplyStored
             end
           else
             with_pagination_options(options) do |options|
-              database.view(all_documents_without_deleted(options.update(:include_docs => true)))
+              database.view(all_documents_without_deleted(options.update(include_docs: true)))
             end
           end
         when :first
           if with_deleted || !soft_deleting_enabled?
-            database.view(all_documents(options.update(:limit => 1, :include_docs => true))).first
+            database.view(all_documents(options.update(limit: 1, include_docs: true))).first
           else
-            database.view(all_documents_without_deleted(options.update(:limit => 1, :include_docs => true))).first
+            database.view(all_documents_without_deleted(options.update(limit: 1, include_docs: true))).first
           end
         else
           raise SimplyStored::Error, "Can't load record without an id" if what.nil?
           document = database.load_document(what)
           if what.is_a?(Array) # Support for multiple find
             #TODO: extended validation and checking, for array arguments
+            raise SimplyStored::NotImplementedError
           else
             if document.nil? or !document.is_a?(self) or (document.deleted? && !with_deleted)
               raise(SimplyStored::RecordNotFound, "#{self.name} could not be found with #{what.inspect}")
@@ -55,7 +56,7 @@ module SimplyStored
 
       def last(*args)
         options = args.last.is_a?(Hash) ? args.last : {}
-        find(:first, options.update(:order => :desc))
+        find(:first, options.update(order: :desc))
       end
 
       def count(options = {})
@@ -63,9 +64,9 @@ module SimplyStored
         with_deleted = options[:with_deleted]
 
         if with_deleted || !soft_deleting_enabled?
-          database.view(all_documents(:reduce => true))
+          database.view(all_documents(reduce: true))
         else
-          database.view(all_documents_without_deleted(:reduce => true))
+          database.view(all_documents_without_deleted(reduce: true))
         end
       end
     end

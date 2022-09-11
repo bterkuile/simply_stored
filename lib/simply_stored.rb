@@ -15,6 +15,7 @@ unless defined?(SimplyStored)
     VERSION = '1.0.0'
     class Error < RuntimeError; end
     class RecordNotFound < RuntimeError; end
+    class NotImplementedError < RuntimeError; end
   end
 
   require 'simply_stored/couch'
