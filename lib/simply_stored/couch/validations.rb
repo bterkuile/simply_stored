@@ -6,7 +6,7 @@ module SimplyStored
         def validate_each(record, attribute, value)
           other_instance = record.class.send("find_by_#{attribute}", value)
           if other_instance && other_instance != record && other_instance.send(attribute) == value
-            record.errors.add(attribute, :taken, options.except(:case_sensitive, :scope).merge(:value => value))
+            record.errors.add(attribute, :taken, **options.except(:case_sensitive, :scope).merge(:value => value))
           end
         end
       end
@@ -16,7 +16,7 @@ module SimplyStored
       class ContainmentValidator < ActiveModel::EachValidator
         def validate_each(record, attribute, value)
           unless Array.wrap(value) - options[:in] == []
-            record.errors.add(attribute, :inclusion, options.except(:in, :within).merge!(:value => value))
+            record.errors.add(attribute, :inclusion, **options.except(:in, :within).merge!(:value => value))
           end
         end
       end
