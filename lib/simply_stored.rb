@@ -16,6 +16,7 @@ unless defined?(SimplyStored)
     class Error < RuntimeError; end
     class RecordNotFound < RuntimeError; end
     class NotImplementedError < RuntimeError; end
+    class ModelNotInstantiatedError < RuntimeError; end
   end
 
   require 'simply_stored/couch'
