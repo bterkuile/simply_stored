@@ -39,8 +39,9 @@ module SimplyStored
             raise SimplyStored::NotImplementedError
           else
             # TODO, this part should be better.
+            raise(SimplyStored::RecordNotFound, "#{self.name} could not be found with #{what.inspect}") unless document.present?
             raise(ModelNotInstantiatedError, "Expected an instance of #{self.class.name} but got an instance of: #{document.class.name}") unless document.is_a?(self)
-            if document.nil? or (document.deleted? && !with_deleted)
+            if document.deleted? && !with_deleted
               raise(SimplyStored::RecordNotFound, "#{self.name} could not be found with #{what.inspect}")
             end
           end
